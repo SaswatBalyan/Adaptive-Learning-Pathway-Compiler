@@ -1,0 +1,4 @@
+Program binary_output=0
+  Outcome     line=1  name="remedial"
+  ProfileSet  line=2  name="performance" op="=" value=60
+  CondBranch  line=3  var="performance" rel="<" value=70 target="remedial"

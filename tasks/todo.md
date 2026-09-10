@@ -32,13 +32,18 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-2:** `make check` 18/18; bison conflict-free; 120-run fuzz clean (no crash/hang);
       diagnostics doc-backed against Bison 3.8.2 info manual
 
-## Phase 4 — AST + RTTI (Exp 8)   → CP-3
-- [ ] T4.1 node hierarchy + LLVM-style `classof`/`isa`/`cast`/`dyn_cast` (no dynamic_cast)
-- [ ] T4.2 ownership model + program root
-- [ ] T4.3 parser builds the AST; `--parse-trace` still works
-- [ ] T4.4 `--dump-ast` RTTI-driven printer + `.ast` goldens
-- [ ] T4.5 `tests/unit_ast.cpp` + `make test-asan`
-- [ ] **CP-3:** dump matches goldens; unit tests pass under ASan/UBSan
+## Phase 4 — AST + RTTI (Exp 8)   ✅ CP-3
+- [x] T4.1 `src/ast.{h,cpp}`: NodeKind + ProfileSet/CondBranch/Outcome, LLVM-style
+      `classof`/`isa`/`cast`/`dyn_cast` (no dynamic_cast, no -frtti) — verified against
+      llvm.org/docs/HowToSetUpLLVMStyleRTTI.html
+- [x] T4.2 `Program` owns nodes via `unique_ptr`, no cross-links
+- [x] T4.3 parser reduce actions build the AST; semantics moved to `check_program()`
+      source-order pass; `--parse-trace` walks the built Program
+- [x] T4.4 `--dump-ast` RTTI-driven printer + 5 `.ast` goldens
+- [x] T4.5 `tests/unit_ast.cpp` (19 checks) + `make test-asan`
+- [x] **CP-3:** `make check-full` green — 23/23 fixtures (plain + sanitized), unit_ast 19/19,
+      cppcheck clean. UBSan-trap + `_GLIBCXX_ASSERTIONS` (mingw has no libasan; real ASan
+      via `make test-asan SAN='-fsanitize=address,undefined'` on Linux)
 
 ## Phase 5 — LLVM IR codegen (Exp 9)   → CP-4
 - [ ] T5.1 codegen skeleton (`@main`, Module::print) + LLVM link; verifier-clean empty IR

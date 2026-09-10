@@ -1,0 +1,3 @@
+Program binary_output=0
+  ProfileSet  line=2  name="grade_level" op="=" value=5
+  ProfileSet  line=3  name="performance" op="=" value=60

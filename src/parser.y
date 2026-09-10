@@ -1,16 +1,20 @@
 /* Path-Lang grammar (Exp 7 / Bison). See SPEC.md 2.3-2.4.
  * Non-reentrant C parser: yylex / yylval / yylloc / yyerror are globals
- * (Bison 3.8.2 manual, "Calling Convention", "Token Values"). */
+ * (Bison 3.8.2 manual, "Calling Convention", "Token Values"). Reduce
+ * actions build the AST (SPEC 2); static-semantic checks run afterward
+ * as a source-order pass (semantics.cpp). */
 %{
-#include <cstdio>
 #include <cstdlib>
+#include <memory>
 
+#include "ast.h"
 #include "diagnostics.h"
-#include "semantics.h"
 
 int yylex(void);
 extern int yylineno;
 void yyerror(const char *msg);
+
+extern alpc::Program *g_program;  // set by the driver before yyparse()
 %}
 
 %locations
@@ -50,12 +54,17 @@ stmt
 
 outcome_stmt
   : OUTCOME IDENT term
-      { alpc::sema_declare_outcome(@2.first_line, $2); free($2); }
+      { g_program->stmts.push_back(
+            std::make_unique<alpc::Outcome>(@2.first_line, $2));
+        free($2); }
   ;
 
 set_stmt
   : SET IDENT set_op NUMBER term
-      { alpc::sema_set(@2.first_line, $2, $3, $4); free($2); }
+      { g_program->stmts.push_back(
+            std::make_unique<alpc::ProfileSet>(
+                @2.first_line, $2, static_cast<alpc::SetOp>($3), $4));
+        free($2); }
   ;
 
 set_op
@@ -66,7 +75,10 @@ set_op
 
 branch_stmt
   : IF IDENT rel NUMBER GOTO IDENT term
-      { alpc::sema_branch(@2.first_line, $2, $3, $4, $6); free($2); free($6); }
+      { g_program->stmts.push_back(
+            std::make_unique<alpc::CondBranch>(
+                @2.first_line, $2, static_cast<alpc::RelOp>($3), $4, $6));
+        free($2); free($6); }
   ;
 
 rel
@@ -77,7 +89,7 @@ rel
 
 term
   : SEMI
-  | SEMI_B    { alpc::sema_mark_binary_output(); }
+  | SEMI_B    { g_program->binary_output = true; }
   ;
 
 %%

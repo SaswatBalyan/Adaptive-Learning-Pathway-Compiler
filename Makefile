@@ -28,8 +28,10 @@ BISONFLAGS := -Wcounterexamples -Werror=conflicts-sr -Werror=conflicts-rr
 LLVM_CONFIG := llvm-config
 
 # Hand-written sources (subject to -Werror).
-HAND_SRCS := $(SRC)/main.cpp $(SRC)/diagnostics.cpp $(SRC)/tokens.cpp $(SRC)/semantics.cpp
+HAND_SRCS := $(SRC)/main.cpp $(SRC)/diagnostics.cpp $(SRC)/tokens.cpp \
+             $(SRC)/semantics.cpp $(SRC)/ast.cpp
 HAND_OBJS := $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(HAND_SRCS))
+HAND_HDRS := $(SRC)/tokens.h $(SRC)/diagnostics.h $(SRC)/semantics.h $(SRC)/ast.h
 
 # Generated sources (warning-exempt).
 GEN_OBJS := $(OBJ)/parser.tab.o $(OBJ)/lex.yy.o
@@ -42,7 +44,7 @@ build: $(BIN)
 $(BIN): $(HAND_OBJS) $(GEN_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(OBJ)/%.o: $(SRC)/%.cpp $(SRC)/tokens.h $(SRC)/diagnostics.h $(SRC)/semantics.h $(OBJ)/parser.tab.h | $(OBJ)
+$(OBJ)/%.o: $(SRC)/%.cpp $(HAND_HDRS) $(OBJ)/parser.tab.h | $(OBJ)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ)/parser.tab.c $(OBJ)/parser.tab.h &: $(SRC)/parser.y | $(OBJ)
@@ -65,8 +67,35 @@ check: build
 	bash tests/run.sh
 
 .PHONY: check-full
-check-full: check
-	@echo "check-full wiring lands in Phase 7"
+check-full: check test-asan cppcheck
+	@echo "check-full: ok"
+
+# CONSTRAINTS F7: sanitized build must pass every fixture, plus RTTI unit tests.
+# The mingw-w64 toolchain ships no libasan/libubsan, so on Windows this uses
+# UBSan in trap mode (UB -> SIGILL, no runtime needed) + libstdc++ assertions
+# + stack protector. On a Linux lab box, override:  make test-asan SAN='-fsanitize=address,undefined'
+SAN ?= -fsanitize=undefined -fsanitize-trap=undefined -D_GLIBCXX_ASSERTIONS \
+       -fstack-protector-all -fno-omit-frame-pointer
+SANOBJ := $(OBJ)/san
+.PHONY: test-asan
+test-asan: $(OBJ)/parser.tab.c $(OBJ)/parser.tab.h $(OBJ)/lex.yy.c | $(OBJ)
+	@mkdir -p $(SANOBJ)
+	$(CXX) $(CXXFLAGS) $(SAN) -o $(SANOBJ)/unit_ast tests/unit_ast.cpp $(SRC)/ast.cpp $(SRC)/diagnostics.cpp $(SRC)/semantics.cpp
+	$(SANOBJ)/unit_ast
+	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/main.o   $(SRC)/main.cpp
+	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/diag.o   $(SRC)/diagnostics.cpp
+	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/tok.o    $(SRC)/tokens.cpp
+	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/sema.o   $(SRC)/semantics.cpp
+	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/ast.o    $(SRC)/ast.cpp
+	$(CXX) $(GENFLAGS) $(SAN) -c -o $(SANOBJ)/parser.o $(OBJ)/parser.tab.c
+	$(CXX) $(GENFLAGS) $(SAN) -c -o $(SANOBJ)/lex.o    $(OBJ)/lex.yy.c
+	$(CXX) $(CXXFLAGS) $(SAN) -o $(SANOBJ)/alpc $(SANOBJ)/main.o $(SANOBJ)/diag.o \
+	  $(SANOBJ)/tok.o $(SANOBJ)/sema.o $(SANOBJ)/ast.o $(SANOBJ)/parser.o $(SANOBJ)/lex.o
+	ALPC_BIN=$(SANOBJ)/alpc bash tests/run.sh
+
+.PHONY: cppcheck
+cppcheck:
+	cppcheck --enable=warning,style --quiet --error-exitcode=1 -I$(SRC) -I$(OBJ) $(HAND_SRCS)
 
 .PHONY: demo
 demo:

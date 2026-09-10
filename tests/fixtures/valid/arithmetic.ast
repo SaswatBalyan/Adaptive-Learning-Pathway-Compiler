@@ -1,0 +1,4 @@
+Program binary_output=0
+  ProfileSet  line=1  name="state" op="=" value=0
+  ProfileSet  line=2  name="state" op="+=" value=15
+  ProfileSet  line=3  name="state" op="-=" value=3

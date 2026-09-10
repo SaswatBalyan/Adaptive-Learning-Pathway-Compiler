@@ -6,8 +6,9 @@ set -u
 export PATH="C:/msys64/mingw64/bin:C:/msys64/usr/bin:$PATH"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ALPC="$ROOT/alpc"
-[ -x "$ROOT/alpc.exe" ] && ALPC="$ROOT/alpc.exe"
+# ALPC_BIN lets `make test-asan` point the same suite at the sanitized binary.
+ALPC="${ALPC_BIN:-$ROOT/alpc}"
+[ -x "$ALPC" ] || { [ -x "$ALPC.exe" ] && ALPC="$ALPC.exe"; }
 VALID="$ROOT/tests/fixtures/valid"
 INVALID="$ROOT/tests/fixtures/invalid"
 
@@ -65,6 +66,7 @@ for edu in "$VALID"/*.edu; do
   name="$(basename "$base")"
   [ -f "$base.tokens" ]     && golden_check "tokens/$name" "$base.tokens" --dump-tokens "$edu"
   [ -f "$base.parsetrace" ] && golden_check "parse/$name"  "$base.parsetrace" --parse-trace "$edu"
+  [ -f "$base.ast" ]        && golden_check "ast/$name"    "$base.ast" --dump-ast "$edu"
 done
 
 echo "== invalid fixtures =="

@@ -1,7 +1,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 
+#include "ast.h"
 #include "diagnostics.h"
 #include "parser.tab.h"  // yyparse, YYSTYPE (yylval)
 #include "semantics.h"
@@ -13,6 +15,9 @@ extern int yylineno;
 extern char *yytext;
 extern FILE *yyin;
 int yyparse(void);
+
+// Shared with the parser's reduce actions.
+alpc::Program *g_program = nullptr;
 
 namespace {
 
@@ -26,19 +31,21 @@ int run_dump_tokens() {
   return alpc::error_count() ? 1 : 0;
 }
 
-int run_parse(bool trace) {
-  alpc::sema_reset();
-  alpc::sema_set_trace(trace);
+// Parse into `program`. Returns the Bison return code (0 == syntactically ok).
+int parse_into(alpc::Program &program) {
+  g_program = &program;
   int prc = yyparse();
-  return (prc != 0 || alpc::error_count()) ? 1 : 0;
+  g_program = nullptr;
+  return prc;
 }
 
 void usage(FILE *out) {
   std::fprintf(out,
                "usage: alpc [MODE] FILE\n"
                "  --parse         parse + static-semantic checks (default)\n"
-               "  --parse-trace   print the reduction trace (Exp 7)\n"
-               "  --dump-tokens   print the token stream (Exp 7)\n");
+               "  --parse-trace   print the reduction trace   (Exp 7)\n"
+               "  --dump-tokens   print the token stream       (Exp 7)\n"
+               "  --dump-ast      print the AST (RTTI-driven)  (Exp 8)\n");
 }
 
 }  // namespace
@@ -70,13 +77,24 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  int rc;
+  int rc = 0;
   if (std::strcmp(mode, "--dump-tokens") == 0) {
     rc = run_dump_tokens();
   } else if (std::strcmp(mode, "--parse") == 0) {
-    rc = run_parse(/*trace=*/false);
+    alpc::Program program;
+    int prc = parse_into(program);
+    alpc::check_program(program);
+    rc = (prc != 0 || alpc::error_count()) ? 1 : 0;
   } else if (std::strcmp(mode, "--parse-trace") == 0) {
-    rc = run_parse(/*trace=*/true);
+    alpc::Program program;
+    int prc = parse_into(program);
+    alpc::print_trace(std::cout, program);
+    rc = (prc != 0 || alpc::error_count()) ? 1 : 0;
+  } else if (std::strcmp(mode, "--dump-ast") == 0) {
+    alpc::Program program;
+    int prc = parse_into(program);
+    alpc::print_ast(std::cout, program);
+    rc = prc ? 1 : 0;  // structural only; --parse validates semantics
   } else {
     std::fprintf(stderr, "unknown mode: %s\n", mode);
     usage(stderr);

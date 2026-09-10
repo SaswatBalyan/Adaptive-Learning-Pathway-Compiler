@@ -1,0 +1,3 @@
+Program binary_output=1
+  ProfileSet  line=2  name="x" op="=" value=1
+  Outcome     line=4  name="done"

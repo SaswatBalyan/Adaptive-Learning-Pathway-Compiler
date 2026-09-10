@@ -1,0 +1,8 @@
+Program binary_output=0
+  Outcome     line=1  name="a"
+  Outcome     line=2  name="b"
+  Outcome     line=3  name="c"
+  ProfileSet  line=4  name="x" op="=" value=5
+  CondBranch  line=5  var="x" rel="<" value=10 target="a"
+  CondBranch  line=6  var="x" rel=">" value=1 target="b"
+  CondBranch  line=7  var="x" rel="==" value=5 target="c"
