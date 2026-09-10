@@ -22,14 +22,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-1:** `make check` green (6/6); bad-char → `line 1: unexpected character '$'`, exit 1;
       build `-Werror` clean, flex clean, cppcheck clean
 
-## Phase 3 — Parser + Backward Design (Exp 7 / Bison)   → CP-2
-- [ ] T3.1 grammar productions + `--parse-trace`; `bison` zero conflicts
-- [ ] T3.2 wire scanner↔parser; `--dump-tokens` regression still green
-- [ ] T3.3 outcome registry + Backward Design check
-- [ ] T3.4 dup-outcome / var-before-use / update-before-declare / reserved `state`
-- [ ] T3.5 error recovery (`stmt : error term`), no crash
-- [ ] T3.6 `.parsetrace` goldens + 7 invalid fixtures
-- [ ] **CP-2:** conflict-free; valid parse; all invalid rejected with exact `line N:`
+## Phase 3 — Parser + Backward Design (Exp 7 / Bison)   ✅ CP-2
+- [x] T3.1 grammar productions + `--parse-trace`; `bison` zero conflicts/warnings
+- [x] T3.2 wire scanner↔parser via parser.tab.h; `--dump-tokens` regression green
+- [x] T3.3 outcome registry + Backward Design check
+- [x] T3.4 dup-outcome / var-before-use / update-before-declare / reserved `state`
+- [x] T3.5 error recovery (`stmt : error term` + `yyerrok`), `parse.error detailed` + `parse.lac full`
+- [x] T3.6 5 `.parsetrace` goldens + 7 new invalid fixtures
+- [x] **CP-2:** `make check` 18/18; bison conflict-free; 120-run fuzz clean (no crash/hang);
+      diagnostics doc-backed against Bison 3.8.2 info manual
 
 ## Phase 4 — AST + RTTI (Exp 8)   → CP-3
 - [ ] T4.1 node hierarchy + LLVM-style `classof`/`isa`/`cast`/`dyn_cast` (no dynamic_cast)

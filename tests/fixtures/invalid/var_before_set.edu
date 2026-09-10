@@ -1,0 +1,2 @@
+OUTCOME remedial;
+IF performance < 70 GOTO remedial;

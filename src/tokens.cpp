@@ -1,22 +1,24 @@
 #include "tokens.h"
 
+#include "parser.tab.h"  // Bison token codes (SET, IF, IDENT, ...)
+
 const char *alpc_token_name(int kind) {
   switch (kind) {
-    case TK_EOF:        return "EOF";
-    case TK_SET:        return "SET";
-    case TK_IF:         return "IF";
-    case TK_GOTO:       return "GOTO";
-    case TK_OUTCOME:    return "OUTCOME";
-    case TK_IDENT:      return "IDENT";
-    case TK_NUMBER:     return "NUMBER";
-    case TK_LT:         return "LT";
-    case TK_GT:         return "GT";
-    case TK_EQ:         return "EQ";
-    case TK_ASSIGN:     return "ASSIGN";
-    case TK_ADD_ASSIGN: return "ADD_ASSIGN";
-    case TK_SUB_ASSIGN: return "SUB_ASSIGN";
-    case TK_SEMI:       return "SEMI";
-    case TK_SEMI_B:     return "SEMI_B";
-    default:            return "?";
+    case 0:          return "EOF";  // YYEOF
+    case SET:        return "SET";
+    case IF:         return "IF";
+    case GOTO:       return "GOTO";
+    case OUTCOME:    return "OUTCOME";
+    case IDENT:      return "IDENT";
+    case NUMBER:     return "NUMBER";
+    case LT:         return "LT";
+    case GT:         return "GT";
+    case EQ:         return "EQ";
+    case ASSIGN:     return "ASSIGN";
+    case ADD_ASSIGN: return "ADD_ASSIGN";
+    case SUB_ASSIGN: return "SUB_ASSIGN";
+    case SEMI:       return "SEMI";
+    case SEMI_B:     return "SEMI_B";
+    default:         return "?";
   }
 }

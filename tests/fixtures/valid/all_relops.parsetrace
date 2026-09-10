@@ -1,0 +1,7 @@
+outcome a
+outcome b
+outcome c
+set x = 5
+branch x < 10 -> a
+branch x > 1 -> b
+branch x == 5 -> c

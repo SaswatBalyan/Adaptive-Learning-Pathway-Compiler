@@ -63,7 +63,8 @@ for edu in "$VALID"/*.edu; do
   [ -e "$edu" ] || continue
   base="${edu%.edu}"
   name="$(basename "$base")"
-  [ -f "$base.tokens" ] && golden_check "tokens/$name" "$base.tokens" --dump-tokens "$edu"
+  [ -f "$base.tokens" ]     && golden_check "tokens/$name" "$base.tokens" --dump-tokens "$edu"
+  [ -f "$base.parsetrace" ] && golden_check "parse/$name"  "$base.parsetrace" --parse-trace "$edu"
 done
 
 echo "== invalid fixtures =="

@@ -1,0 +1,3 @@
+set state = 0
+set state += 15
+set state -= 3

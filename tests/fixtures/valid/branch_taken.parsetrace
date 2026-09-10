@@ -1,0 +1,3 @@
+outcome remedial
+set performance = 60
+branch performance < 70 -> remedial

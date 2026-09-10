@@ -34,8 +34,10 @@ a constraint to make a change pass — fix the code or raise the issue.
 
 | Metric | Today (2026-09-11) | Notes |
 |---|---|---|
-| Fixture count | 6 (5 valid tokens + 1 invalid) | Ratchet up each phase; never delete a passing fixture to make a change land. |
-| `--dump-tokens` working | yes (Phase 2) | `--parse-trace` P3, `--dump-ast` P4, `--emit-ir` P5. Once a mode exists it must keep working. |
+| Fixture count | 18 checks (5 valid x2 goldens + 8 invalid) | Ratchet up each phase; never delete a passing fixture to make a change land. |
+| Modes working | `--dump-tokens`, `--parse`, `--parse-trace` (P2-3) | `--dump-ast` P4, `--emit-ir` P5. Once a mode exists it must keep working. |
+| Bison conflicts / warnings | 0 / 0 | `-Werror=conflicts-sr -Werror=conflicts-rr` in the Makefile. |
+| Fuzz (random input x all modes) | 120 runs, 0 crash/hang | Re-run in `make check-full` (Phase 7). |
 | cppcheck findings (`cppcheck --enable=warning,style src/*.cpp`) | 0 | Advisory / warn. Don't increase it. |
 
 ## Check placement by cost

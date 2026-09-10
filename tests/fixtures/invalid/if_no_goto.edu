@@ -1,0 +1,3 @@
+OUTCOME done;
+SET x = 5;
+IF x < 10 done;
