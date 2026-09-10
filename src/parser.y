@@ -33,6 +33,11 @@ extern alpc::Program *g_program;  // set by the driver before yyparse()
 
 %type <ival> set_op rel
 
+/* IDENT carries a strdup'd string; free it if error recovery discards the token
+ * (Bison manual, "Destructor Decl"). Rule actions free the ones they consume;
+ * the destructor only runs for tokens the parser drops before a reduce. */
+%destructor { free($$); } <sval>
+
 %%
 
 program

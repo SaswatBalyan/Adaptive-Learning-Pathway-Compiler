@@ -79,38 +79,35 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  int rc = 0;
-  if (std::strcmp(mode, "--dump-tokens") == 0) {
+  const bool m_tokens = std::strcmp(mode, "--dump-tokens") == 0;
+  const bool m_trace  = std::strcmp(mode, "--parse-trace") == 0;
+  const bool m_ast    = std::strcmp(mode, "--dump-ast") == 0;
+  const bool m_parse  = std::strcmp(mode, "--parse") == 0;
+  const bool m_ir     = std::strcmp(mode, "--emit-ir") == 0;
+
+  int rc;
+  if (m_tokens) {
     rc = run_dump_tokens();
-  } else if (std::strcmp(mode, "--parse") == 0) {
+  } else if (m_trace || m_ast || m_parse || m_ir) {
     alpc::Program program;
     int prc = parse_into(program);
-    alpc::check_program(program);
-    rc = (prc != 0 || alpc::error_count()) ? 1 : 0;
-  } else if (std::strcmp(mode, "--parse-trace") == 0) {
-    alpc::Program program;
-    int prc = parse_into(program);
-    alpc::print_trace(std::cout, program);
-    rc = (prc != 0 || alpc::error_count()) ? 1 : 0;
-  } else if (std::strcmp(mode, "--dump-ast") == 0) {
-    alpc::Program program;
-    int prc = parse_into(program);
-    alpc::print_ast(std::cout, program);
-    rc = prc ? 1 : 0;  // structural only; --parse validates semantics
-  } else if (std::strcmp(mode, "--emit-ir") == 0) {
-    alpc::Program program;
-    int prc = parse_into(program);
-    alpc::check_program(program);
-    if (prc != 0 || alpc::error_count() != 0) {
-      rc = 1;  // do not lower invalid input
+    if (m_trace) alpc::print_trace(std::cout, program);
+    if (m_ast) alpc::print_ast(std::cout, program);
+    alpc::check_program(program);  // semantic errors count for every parse mode
+    const bool valid = (prc == 0 && alpc::error_count() == 0);
+
+    if (!m_ir) {
+      rc = valid ? 0 : 1;
+    } else if (!valid) {
+      rc = 1;  // never lower invalid input
     } else {
       bool ok = false;
       std::string ir = alpc::emit_ir(program, path, ok);
-      if (!ok) {
-        rc = 3;
-      } else {
+      if (ok) {
         std::cout << ir;
         rc = 0;
+      } else {
+        rc = 3;  // internal error: IR failed verification
       }
     }
   } else {

@@ -12,7 +12,7 @@ const char *const kStateVar = "state";
 }
 
 int check_program(const Program &p) {
-  std::set<std::string> outcomes;  // declared so far, in source order
+  std::set<std::string> outcomes;  // outcome names declared by an earlier stmt
   std::set<std::string> vars;      // profile vars + `state`, once SET
   const int before = error_count();
 

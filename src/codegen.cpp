@@ -1,9 +1,7 @@
 #include "codegen.h"
 
 #include <map>
-#include <set>
 #include <string>
-#include <vector>
 
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Function.h"
@@ -22,7 +20,6 @@ namespace alpc {
 namespace {
 
 using llvm::BasicBlock;
-using llvm::ConstantInt;
 using llvm::Function;
 using llvm::FunctionType;
 using llvm::IRBuilder;
@@ -59,7 +56,9 @@ Function *build_print_binary(llvm::Module &m, IRBuilder<> &b, Function *putchar_
   b.CreateCall(putchar_fn, {b.getInt32('0')});
   b.CreateBr(done);
 
-  // scan: find the most-significant set bit, i from 31 down.
+  // scan: walk i from bit 31 down to the most-significant set bit. `val != 0`
+  // is guaranteed by the entry check, so some bit in [0,31] is set and `i`
+  // reaches `emit` before it could go negative.
   b.SetInsertPoint(scan);
   llvm::PHINode *i = b.CreatePHI(i32, 2, "i");
   Value *bit = b.CreateAnd(b.CreateLShr(val, i), k1, "bit");
