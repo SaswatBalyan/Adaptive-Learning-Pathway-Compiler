@@ -1,0 +1,3 @@
+OUTCOME a; b
+SET state = 6;
+IF state < 100 GOTO a; b

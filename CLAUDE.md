@@ -8,6 +8,8 @@ ends with `; b`).
 
 ## Source of truth
 
+- `README.md` — build, run, layout, LLVM-version note
+- `docs/DEMO.md` — the evaluator walkthrough (all five artifacts, one run)
 - `PRD_Adaptive_Learning_Pathway_Compiler.md` — product requirements
 - `document-export-*.md` — PRD + the 30-hour implementation plan (gap tables, schedules)
 - `docs/EXECUTION_PLAN.md` — the phase-by-phase build plan and which skill drives each phase

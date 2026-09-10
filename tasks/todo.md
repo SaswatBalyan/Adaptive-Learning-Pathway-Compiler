@@ -76,9 +76,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] T7.4 `make check-full` green — 38/38 fixtures
 - [x] **CP-6**
 
-## Phase 8 — Demo readiness   → CP-7
-- [ ] T8.1 `agent-skills:ship` pre-demo checklist
-- [ ] T8.2 `docs/DEMO.md` — 5 artifacts in sequence, labeled by Exp
-- [ ] T8.3 `README.md`
-- [ ] T8.4 ADRs finalized
-- [ ] **CP-7:** demo runs from `DEMO.md` alone
+## Phase 8 — Demo readiness   ✅ CP-7
+- [x] T8.1 ship checklist → `tasks/ship-decision.md` (GO; no blockers). Coverage-gap
+      fixtures added: empty_program, semib_at_eof, negative_score, multi_binary
+- [x] T8.2 `docs/DEMO.md` — 5 artifacts in sequence, each labeled by Exp, + invalid-input demos
+- [x] T8.3 `README.md`
+- [x] T8.4 ADRs 0001–0004 in `docs/adr/`; CLAUDE.md points at README + DEMO
+- [x] **CP-7:** `make demo` and every `docs/DEMO.md` command verified; 42/42 fixtures
