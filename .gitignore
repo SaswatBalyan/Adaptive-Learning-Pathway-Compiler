@@ -1,0 +1,29 @@
+# Build artifacts
+/build/
+*.o
+*.obj
+*.exe
+*.out
+alpc
+alpc.exe
+
+# Flex/Bison generated sources
+src/lex.yy.c
+src/scanner.c
+src/parser.tab.c
+src/parser.tab.h
+src/parser.output
+src/*.gen.*
+
+# LLVM / codegen output
+*.ll
+*.bc
+*.s
+!examples/*.ll
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(flex:*)",
+      "Bash(bison:*)",
+      "Bash(g++:*)",
+      "Bash(clang++:*)",
+      "Bash(llvm-as:*)",
+      "Bash(opt:*)",
+      "Bash(lli:*)",
+      "Bash(cppcheck:*)",
+      "Bash(./alpc:*)",
+      "Bash(tests/run.sh:*)",
+      "Bash(export PATH=*)"
+    ]
+  }
+}
