@@ -45,13 +45,16 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
       cppcheck clean. UBSan-trap + `_GLIBCXX_ASSERTIONS` (mingw has no libasan; real ASan
       via `make test-asan SAN='-fsanitize=address,undefined'` on Linux)
 
-## Phase 5 — LLVM IR codegen (Exp 9)   → CP-4
-- [ ] T5.1 codegen skeleton (`@main`, Module::print) + LLVM link; verifier-clean empty IR
-- [ ] T5.2 `SET` + `+=`/`-=` (alloca/store/load/add/sub)
-- [ ] T5.3 `IF...GOTO` → icmp + br i1 + per-outcome basic blocks
-- [ ] T5.4 outcome blocks → prog_end → load `state`
-- [ ] T5.5 property assertions in `run.sh` (verify + lli output)
-- [ ] **CP-4:** every valid fixture passes `opt -passes=verify` and runs under `lli`
+## Phase 5 — LLVM IR codegen (Exp 9)   ✅ CP-4
+- [x] T5.1 `src/codegen.{h,cpp}`: LLVMContext/Module/IRBuilder, `@main`, `Module::print`;
+      LLVM 22 API verified against installed headers. Link `-lLLVM-22`.
+- [x] T5.2 `SET` + `+=`/`-=` → alloca (hoisted, zero-init) / store / load+add|sub+store
+- [x] T5.3 `IF...GOTO` → `CreateICmp` + `CreateCondBr` to per-outcome BB + fresh `afterN`
+- [x] T5.4 OUTCOME = declaration only (Backward Design puts them up top); every outcome
+      block + fall-through → `prog_end` loads `state`; `@print_binary` bit-loop (PRD 4.6)
+- [x] T5.5 `run.sh` `ir_check`: `opt -passes=verify` + `.irhas` substrings + `.run` lli stdout
+- [x] **CP-4:** 28/28 fixture checks (plain + sanitized). 21/21 fuzz programs verify-clean.
+      SPEC 2.1 example fixed (no dup outcome; catch-all `IF < 1000`).
 
 ## Phase 6 — Binary output + end-to-end (Exp 10)   → CP-5
 - [ ] T6.1 `@print_binary` bit loop in IR (0→0, 1→1, 15→1111, 255→11111111)

@@ -1,0 +1,18 @@
+# ALPC demonstration pathway (SPEC.md 2.1).
+# Backward Design: every learning outcome is declared before any rule targets it.
+OUTCOME remedial;
+OUTCOME core;
+OUTCOME advanced;
+
+# Student profile.
+SET grade_level = 5;
+SET performance = 60;
+
+# Fusion Function: the Student State / Alignment Score.
+SET state = 0;
+SET state += 15;
+
+# Adaptive logic.
+IF performance < 70 GOTO remedial;
+IF performance > 85 GOTO advanced;
+IF performance < 1000 GOTO core; b

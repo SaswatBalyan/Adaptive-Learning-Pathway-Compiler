@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "ast.h"
+#include "codegen.h"
 #include "diagnostics.h"
 #include "parser.tab.h"  // yyparse, YYSTYPE (yylval)
 #include "semantics.h"
@@ -42,16 +43,17 @@ int parse_into(alpc::Program &program) {
 void usage(FILE *out) {
   std::fprintf(out,
                "usage: alpc [MODE] FILE\n"
-               "  --parse         parse + static-semantic checks (default)\n"
-               "  --parse-trace   print the reduction trace   (Exp 7)\n"
-               "  --dump-tokens   print the token stream       (Exp 7)\n"
-               "  --dump-ast      print the AST (RTTI-driven)  (Exp 8)\n");
+               "  --emit-ir       emit LLVM IR to stdout       (Exp 9, default)\n"
+               "  --parse         parse + static-semantic checks\n"
+               "  --parse-trace   print the reduction trace    (Exp 7)\n"
+               "  --dump-tokens   print the token stream        (Exp 7)\n"
+               "  --dump-ast      print the AST (RTTI-driven)   (Exp 8)\n");
 }
 
 }  // namespace
 
 int main(int argc, char **argv) {
-  const char *mode = "--parse";
+  const char *mode = "--emit-ir";
   const char *path = nullptr;
 
   for (int i = 1; i < argc; ++i) {
@@ -95,6 +97,22 @@ int main(int argc, char **argv) {
     int prc = parse_into(program);
     alpc::print_ast(std::cout, program);
     rc = prc ? 1 : 0;  // structural only; --parse validates semantics
+  } else if (std::strcmp(mode, "--emit-ir") == 0) {
+    alpc::Program program;
+    int prc = parse_into(program);
+    alpc::check_program(program);
+    if (prc != 0 || alpc::error_count() != 0) {
+      rc = 1;  // do not lower invalid input
+    } else {
+      bool ok = false;
+      std::string ir = alpc::emit_ir(program, path, ok);
+      if (!ok) {
+        rc = 3;
+      } else {
+        std::cout << ir;
+        rc = 0;
+      }
+    }
   } else {
     std::fprintf(stderr, "unknown mode: %s\n", mode);
     usage(stderr);

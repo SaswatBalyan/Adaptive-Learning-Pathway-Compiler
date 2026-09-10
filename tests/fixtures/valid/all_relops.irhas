@@ -1,0 +1,4 @@
+icmp slt i32
+icmp sgt i32
+icmp eq i32
+br i1 %cond

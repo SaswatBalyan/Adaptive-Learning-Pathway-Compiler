@@ -25,13 +25,17 @@ BISON := bison
 # Any shift/reduce or reduce/reduce conflict is a hard failure (CONSTRAINTS F2).
 BISONFLAGS := -Wcounterexamples -Werror=conflicts-sr -Werror=conflicts-rr
 
-LLVM_CONFIG := llvm-config
+LLVM_CONFIG    := llvm-config
+LLVM_CXXFLAGS  := $(shell $(LLVM_CONFIG) --cxxflags)
+LLVM_LDFLAGS   := $(shell $(LLVM_CONFIG) --ldflags)
+LLVM_LIBS      := $(shell $(LLVM_CONFIG) --libs core) $(shell $(LLVM_CONFIG) --system-libs)
 
 # Hand-written sources (subject to -Werror).
 HAND_SRCS := $(SRC)/main.cpp $(SRC)/diagnostics.cpp $(SRC)/tokens.cpp \
-             $(SRC)/semantics.cpp $(SRC)/ast.cpp
+             $(SRC)/semantics.cpp $(SRC)/ast.cpp $(SRC)/codegen.cpp
 HAND_OBJS := $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(HAND_SRCS))
-HAND_HDRS := $(SRC)/tokens.h $(SRC)/diagnostics.h $(SRC)/semantics.h $(SRC)/ast.h
+HAND_HDRS := $(SRC)/tokens.h $(SRC)/diagnostics.h $(SRC)/semantics.h \
+             $(SRC)/ast.h $(SRC)/codegen.h
 
 # Generated sources (warning-exempt).
 GEN_OBJS := $(OBJ)/parser.tab.o $(OBJ)/lex.yy.o
@@ -42,10 +46,14 @@ GEN_OBJS := $(OBJ)/parser.tab.o $(OBJ)/lex.yy.o
 build: $(BIN)
 
 $(BIN): $(HAND_OBJS) $(GEN_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LLVM_LDFLAGS) $(LLVM_LIBS)
 
 $(OBJ)/%.o: $(SRC)/%.cpp $(HAND_HDRS) $(OBJ)/parser.tab.h | $(OBJ)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+# codegen.cpp pulls in LLVM headers -> needs llvm-config cxxflags.
+$(OBJ)/codegen.o: $(SRC)/codegen.cpp $(SRC)/codegen.h $(SRC)/ast.h | $(OBJ)
+	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) -c -o $@ $<
 
 $(OBJ)/parser.tab.c $(OBJ)/parser.tab.h &: $(SRC)/parser.y | $(OBJ)
 	$(BISON) $(BISONFLAGS) -d -o $(OBJ)/parser.tab.c $<
@@ -67,7 +75,7 @@ check: build
 	bash tests/run.sh
 
 .PHONY: check-full
-check-full: check test-asan cppcheck
+check-full: check test-asan cppcheck demo
 	@echo "check-full: ok"
 
 # CONSTRAINTS F7: sanitized build must pass every fixture, plus RTTI unit tests.
@@ -87,10 +95,12 @@ test-asan: $(OBJ)/parser.tab.c $(OBJ)/parser.tab.h $(OBJ)/lex.yy.c | $(OBJ)
 	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/tok.o    $(SRC)/tokens.cpp
 	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/sema.o   $(SRC)/semantics.cpp
 	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/ast.o    $(SRC)/ast.cpp
+	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) $(SAN) -c -o $(SANOBJ)/codegen.o $(SRC)/codegen.cpp
 	$(CXX) $(GENFLAGS) $(SAN) -c -o $(SANOBJ)/parser.o $(OBJ)/parser.tab.c
 	$(CXX) $(GENFLAGS) $(SAN) -c -o $(SANOBJ)/lex.o    $(OBJ)/lex.yy.c
 	$(CXX) $(CXXFLAGS) $(SAN) -o $(SANOBJ)/alpc $(SANOBJ)/main.o $(SANOBJ)/diag.o \
-	  $(SANOBJ)/tok.o $(SANOBJ)/sema.o $(SANOBJ)/ast.o $(SANOBJ)/parser.o $(SANOBJ)/lex.o
+	  $(SANOBJ)/tok.o $(SANOBJ)/sema.o $(SANOBJ)/ast.o $(SANOBJ)/codegen.o \
+	  $(SANOBJ)/parser.o $(SANOBJ)/lex.o $(LLVM_LDFLAGS) $(LLVM_LIBS)
 	ALPC_BIN=$(SANOBJ)/alpc bash tests/run.sh
 
 .PHONY: cppcheck
@@ -98,8 +108,12 @@ cppcheck:
 	cppcheck --enable=warning,style --quiet --error-exitcode=1 -I$(SRC) -I$(OBJ) $(HAND_SRCS)
 
 .PHONY: demo
-demo:
-	@echo "demo wiring lands in Phase 6"
+demo: build
+	./$(BIN) --emit-ir examples/pathway.edu > $(OBJ)/pathway.ll
+	opt -passes=verify $(OBJ)/pathway.ll -o /dev/null
+	lli $(OBJ)/pathway.ll | tr -d '\r' > $(OBJ)/pathway.out
+	diff -u examples/pathway.expected $(OBJ)/pathway.out
+	@echo "demo: examples/pathway.edu compiles, verifies, runs -> $$(cat $(OBJ)/pathway.out)"
 
 .PHONY: tools
 tools:

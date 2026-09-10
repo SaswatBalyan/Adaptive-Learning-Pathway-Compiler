@@ -45,9 +45,13 @@ SET state += 15;
 
 IF performance < 70 GOTO remedial;
 IF performance > 85 GOTO advanced;
-
-OUTCOME core; b
+IF performance < 1000 GOTO core; b
 ```
+
+The grammar has no unconditional jump, so the last rule (`< 1000`) is the
+always-true "default path" to the terminal outcome. An outcome is declared once;
+a later `IF ... GOTO` only references it (re-declaring a name is an error, 2.4).
+The `; b` on the final statement selects binary output for the whole program.
 
 ### 2.2 Lexical grammar (`scanner.l`, Exp 7 / Flex)
 
@@ -126,8 +130,9 @@ Any violation ⇒ compilation fails after parsing (non-zero exit), no IR emitted
 - If **any** statement in the program used the `; b` terminator, the program prints the
   final Alignment Score as a binary string (no leading zeros; `0` prints as `0`),
   followed by a newline. Otherwise it prints the score in decimal.
-- Worked example: profile `performance = 60`; `state` 0 → `+= 15` → 15; `IF 60 < 70`
-  true ⇒ GOTO `remedial`; pathway ends; `; b` present ⇒ prints `1111`.
+- Worked example (2.1): profile `performance = 60`; `state` 0 → `+= 15` → 15;
+  `IF 60 < 70` true ⇒ GOTO `remedial`; pathway ends; `; b` present ⇒ prints `1111`.
+  (`15` = binary `1111`, matching the PRD.)
 
 ---
 
