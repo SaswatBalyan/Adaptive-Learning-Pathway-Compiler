@@ -1,0 +1,3 @@
+SET state = 0;
+SET state += 15;
+SET state -= 3;

@@ -13,13 +13,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] tasks/plan.md — dependency graph, vertical slices, checkpoints
 - [x] tasks/todo.md
 
-## Phase 2 — Lexer (Exp 7 / Flex)   → CP-1
-- [ ] T2.1 diagnostics module (`src/diagnostics.{h,cpp}`)
-- [ ] T2.2 token set + `src/scanner.l` skeleton (line tracking, comments, ws, EOF)
-- [ ] T2.3 `--dump-tokens` mode + driver bootstrap + Makefile wiring
-- [ ] T2.4 `; b` terminator rule (`SEMI_B` vs `SEMI`)
-- [ ] T2.5 valid+invalid fixtures, `.tokens` goldens, `tests/run.sh` v1
-- [ ] **CP-1:** `make check` green; token stream demo artifact; bad-char errors cleanly
+## Phase 2 — Lexer (Exp 7 / Flex)   ✅ CP-1
+- [x] T2.1 diagnostics module (`src/diagnostics.{h,cpp}`)
+- [x] T2.2 token set + `src/scanner.l` skeleton (line tracking, comments, ws, EOF)
+- [x] T2.3 `--dump-tokens` mode + driver bootstrap + Makefile wiring
+- [x] T2.4 `; b` terminator rule (`SEMI_B` vs `SEMI`)
+- [x] T2.5 valid+invalid fixtures, `.tokens` goldens, `tests/run.sh` v1
+- [x] **CP-1:** `make check` green (6/6); bad-char → `line 1: unexpected character '$'`, exit 1;
+      build `-Werror` clean, flex clean, cppcheck clean
 
 ## Phase 3 — Parser + Backward Design (Exp 7 / Bison)   → CP-2
 - [ ] T3.1 grammar productions + `--parse-trace`; `bison` zero conflicts

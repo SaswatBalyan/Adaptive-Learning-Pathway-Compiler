@@ -1,0 +1,11 @@
+line 2: SET "SET"
+line 2: IDENT "grade_level"
+line 2: ASSIGN "="
+line 2: NUMBER "5"
+line 2: SEMI ";"
+line 3: SET "SET"
+line 3: IDENT "performance"
+line 3: ASSIGN "="
+line 3: NUMBER "60"
+line 3: SEMI ";"
+EOF

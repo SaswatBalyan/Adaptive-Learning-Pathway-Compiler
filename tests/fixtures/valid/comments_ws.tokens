@@ -1,0 +1,9 @@
+line 2: SET "SET"
+line 2: IDENT "x"
+line 2: ASSIGN "="
+line 2: NUMBER "1"
+line 2: SEMI ";"
+line 4: OUTCOME "OUTCOME"
+line 4: IDENT "done"
+line 4: SEMI_B "; b"
+EOF

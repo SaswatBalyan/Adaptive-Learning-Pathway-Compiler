@@ -34,9 +34,9 @@ a constraint to make a change pass — fix the code or raise the issue.
 
 | Metric | Today (2026-09-11) | Notes |
 |---|---|---|
-| Fixture count | 0 | Ratchet up each phase; never delete a passing fixture to make a change land. |
-| `--dump-tokens` / `--parse-trace` / `--dump-ast` modes working | n/a (not built) | Once a mode exists it must keep working in every later phase. |
-| cppcheck findings (`cppcheck --enable=warning,style --error-exitcode=0 src/`) | n/a | Advisory / warn. Record count once source exists; don't increase it. |
+| Fixture count | 6 (5 valid tokens + 1 invalid) | Ratchet up each phase; never delete a passing fixture to make a change land. |
+| `--dump-tokens` working | yes (Phase 2) | `--parse-trace` P3, `--dump-ast` P4, `--emit-ir` P5. Once a mode exists it must keep working. |
+| cppcheck findings (`cppcheck --enable=warning,style src/*.cpp`) | 0 | Advisory / warn. Don't increase it. |
 
 ## Check placement by cost
 

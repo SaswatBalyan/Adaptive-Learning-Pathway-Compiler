@@ -1,0 +1,4 @@
+# leading comment
+   SET   x=1;      # trailing comment
+
+OUTCOME done; b

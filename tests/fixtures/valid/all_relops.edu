@@ -1,0 +1,7 @@
+OUTCOME a;
+OUTCOME b;
+OUTCOME c;
+SET x = 5;
+IF x < 10 GOTO a;
+IF x > 1 GOTO b;
+IF x == 5 GOTO c;
