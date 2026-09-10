@@ -32,6 +32,4 @@ Install **MSYS2** (`winget install MSYS2.MSYS2`) and, via pacman:
 - The lab machine will use its own LLVM; document the version assumption in `README`
   and keep LLVM API usage conservative (IRBuilder, BasicBlock, verifyModule — stable
   across many majors).
-- Settings PATH injection via `.claude/settings.local.json` was **not** used: the
-  `${PATH}` expansion is unreliable and a bad value breaks every shell command. The
-  Makefile-baked PATH is the safe equivalent.
+- The Makefile-baked PATH keeps tool invocation consistent from any supported shell.

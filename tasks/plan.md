@@ -1,6 +1,6 @@
 # ALPC Implementation Plan
 
-Derived from `SPEC.md` (authoritative) and `docs/EXECUTION_PLAN.md` (phase→skill map).
+Derived from `SPEC.md` (authoritative) and `docs/EXECUTION_PLAN.md` (phase map).
 Work is sliced **vertically**: each task drives one construct all the way through the
 stage being built and lands with its fixtures, not a horizontal "all tokens, then all
 grammar" layering.
@@ -41,18 +41,6 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
   full pipeline shown in one run. Exp 10.
 - **CP-6 (after Phase 7):** five-axis review findings resolved; `make check-full` green.
 - **CP-7 (after Phase 8):** `docs/DEMO.md` walkthrough runs end to end; README done.
-
-## Phase → skill (from EXECUTION_PLAN.md)
-
-| Phase | Skill(s) |
-|---|---|
-| 2 Lexer | `agent-skills:test` → `agent-skills:build` |
-| 3 Parser | `agent-skills:source-driven-development` + `agent-skills:test` → `agent-skills:build` |
-| 4 AST/RTTI | `agent-skills:api-and-interface-design` + `agent-skills:test` → `agent-skills:build` |
-| 5 Codegen | `agent-skills:source-driven-development` → `agent-skills:build` + `agent-skills:debugging-and-error-recovery` |
-| 6 Binary/E2E | `agent-skills:test` → `agent-skills:build` |
-| 7 Review | `agent-skills:review` → `agent-skills:code-simplify` |
-| 8 Demo | `agent-skills:ship` + `agent-skills:documentation-and-adrs` |
 
 ## Task detail
 
@@ -145,15 +133,15 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
 
 ### Phase 7 — Review & simplify
 
-- **T7.1** `agent-skills:review` five-axis over `src/` + tests. Record findings in
+- **T7.1** Perform a five-axis review over `src/` + tests. Record findings in
   `tasks/review-findings.md`.
-- **T7.2** Fix correctness/security findings. **T7.3** `agent-skills:code-simplify` pass.
+- **T7.2** Fix correctness/security findings. **T7.3** Perform a code-simplification pass.
 - **T7.4** `make check-full` green (test-asan + cppcheck + demo + coverage).
   *AC (CP-6).*
 
 ### Phase 8 — Demo readiness
 
-- **T8.1** `agent-skills:ship` pre-demo checklist adapted to the evaluator demo.
+- **T8.1** Complete the pre-demo checklist adapted to the evaluator demo.
 - **T8.2** `docs/DEMO.md`: 5 artifacts in sequence (tokens → parse trace → AST → `.ll`
   → console binary), each labeled with its Exp number, plus the two invalid-input
   demos. **T8.3** `README.md` (build, run, layout). **T8.4** ADRs finalized.

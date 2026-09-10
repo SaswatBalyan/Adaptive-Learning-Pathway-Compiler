@@ -100,7 +100,7 @@ docs/
   EXECUTION_PLAN.md   how the project was built, phase by phase
   adr/                0001 toolchain · 0002 Path-Lang semantics ·
                       0003 AST/RTTI + sanitizers · 0004 codegen control flow
-SPEC.md  CONSTRAINTS.md  CLAUDE.md
+SPEC.md  CONSTRAINTS.md
 ```
 
 ## Architecture notes

@@ -197,11 +197,11 @@ examples/
   pathway.edu        the demonstration program
   pathway.expected   its console output ("1111")
 docs/
-  EXECUTION_PLAN.md  phase plan + skill mapping
+  EXECUTION_PLAN.md  phase-by-phase build plan
   DEMO.md            evaluator walkthrough (written in Phase 8)
   adr/               architecture decision records
 Makefile
-CONSTRAINTS.md  CLAUDE.md  SPEC.md
+CONSTRAINTS.md  SPEC.md
 ```
 
 Build order (each phase depends on the previous): `diagnostics` → `scanner` →

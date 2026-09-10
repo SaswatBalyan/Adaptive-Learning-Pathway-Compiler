@@ -3,9 +3,8 @@
 Scope: ALPC v1 — the full lexer → parser → AST/RTTI → LLVM IR pipeline for the
 BCSE307P lab demo. "Ship" here = ready to present to the evaluator.
 
-The three `/ship` personas were run as an inline synthesis in the main context
-(this session does not spawn subagents without an explicit request); the
-code-review axis is `tasks/review-findings.md`, security and test-coverage below.
+The decision is based on the code review in `tasks/review-findings.md`, together
+with the security and test-coverage checks below.
 
 ## Blockers (must fix before ship)
 

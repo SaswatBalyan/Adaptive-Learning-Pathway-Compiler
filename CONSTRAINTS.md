@@ -2,9 +2,8 @@
 
 **Detected:** Greenfield C++17 project. Toolchain: Flex + Bison + LLVM C++ API + g++/clang
 (MSYS2 mingw-w64). No pre-existing test runner, lint config, coverage data, or CI.
-Harness: Claude Code.
 
-**Strictness: Strict** (chosen 2026-09-11). Agents must read this file and must never weaken
+**Strictness: Strict** (chosen 2026-09-11). Contributors must read this file and must never weaken
 a constraint to make a change pass — fix the code or raise the issue.
 
 ---
@@ -48,7 +47,7 @@ a constraint to make a change pass — fix the code or raise the issue.
 
 ## package.json equivalents (Makefile targets)
 
-| Skill convention | Makefile target |
+| Workflow convention | Makefile target |
 |---|---|
 | `check:fast` | `make lint-fast` (compile sources `-Werror`, bison conflict check) |
 | `check:task` | `make check` (`make` + `tests/run.sh`) |

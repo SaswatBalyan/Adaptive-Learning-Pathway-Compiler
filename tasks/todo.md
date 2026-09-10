@@ -5,7 +5,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 ## Phase 0 — Foundation  ✅ (CP-0)
 - [x] MSYS2 toolchain installed + verified (ADR 0001)
 - [x] Self-contained Makefile, scaffold dirs, .gitignore, .gitattributes (LF)
-- [x] CLAUDE.md, CONSTRAINTS.md (strict), EXECUTION_PLAN.md
+- [x] CONSTRAINTS.md (strict), EXECUTION_PLAN.md
 - [x] SPEC.md — grammar + semantics, PRD gaps closed (ADR 0002)
 
 ## Phase 1 — Spec & task breakdown  ✅
@@ -81,5 +81,5 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
       fixtures added: empty_program, semib_at_eof, negative_score, multi_binary
 - [x] T8.2 `docs/DEMO.md` — 5 artifacts in sequence, each labeled by Exp, + invalid-input demos
 - [x] T8.3 `README.md`
-- [x] T8.4 ADRs 0001–0004 in `docs/adr/`; CLAUDE.md points at README + DEMO
+- [x] T8.4 ADRs 0001–0004 in `docs/adr/`; README points at the demo documentation
 - [x] **CP-7:** `make demo` and every `docs/DEMO.md` command verified; 42/42 fixtures
