@@ -1,0 +1,6 @@
+line 1: SET "SET"
+line 1: IDENT "state"
+line 1: ASSIGN "="
+line 1: NUMBER "15"
+line 1: SEMI_B "; b"
+EOF

@@ -56,12 +56,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-4:** 28/28 fixture checks (plain + sanitized). 21/21 fuzz programs verify-clean.
       SPEC 2.1 example fixed (no dup outcome; catch-all `IF < 1000`).
 
-## Phase 6 — Binary output + end-to-end (Exp 10)   → CP-5
-- [ ] T6.1 `@print_binary` bit loop in IR (0→0, 1→1, 15→1111, 255→11111111)
-- [ ] T6.2 `; b` program flag → binary vs decimal at prog_end
-- [ ] T6.3 `examples/pathway.edu` + `.expected` (== `1111`)
-- [ ] T6.4 `make demo` + binary fixtures
-- [ ] **CP-5:** `make demo` green; full pipeline in one run
+## Phase 6 — Binary output + end-to-end (Exp 10)   ✅ CP-5
+- [x] T6.1 `@print_binary` bit loop — fixtures binary_zero/one/fifteen/255
+      (0→0, 1→1, 15→1111, 255→11111111) all verified via lli
+- [x] T6.2 `; b` program flag → `@print_binary` vs `@printf "%d\n"` at prog_end
+- [x] T6.3 `examples/pathway.edu` + `.expected` (== `1111`, matches PRD)
+- [x] T6.4 `make demo` (emit → opt verify → lli → diff); fusion_branch_binary
+      end-to-end fixture (100 −40 +195 = 255 → `11111111`)
+- [x] **CP-5:** `make check-full` green — 36/36 fixtures, demo prints `1111`,
+      full pipeline (tokens→trace→ast→ir→binary) demonstrable in one run
 
 ## Phase 7 — Review & simplify   → CP-6
 - [ ] T7.1 `agent-skills:review` five-axis → `tasks/review-findings.md`

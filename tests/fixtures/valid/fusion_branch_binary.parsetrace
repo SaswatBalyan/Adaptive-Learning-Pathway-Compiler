@@ -1,0 +1,10 @@
+outcome low
+outcome high
+set performance = 90
+set state = 100
+set state -= 40
+set state += 195
+branch performance < 50 -> low
+branch performance > 200 -> high
+branch performance < 1000 -> high
+binary-output

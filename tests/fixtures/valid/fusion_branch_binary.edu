@@ -1,0 +1,9 @@
+OUTCOME low;
+OUTCOME high;
+SET performance = 90;
+SET state = 100;
+SET state -= 40;
+SET state += 195;
+IF performance < 50 GOTO low;
+IF performance > 200 GOTO high;
+IF performance < 1000 GOTO high; b
