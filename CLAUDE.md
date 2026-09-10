@@ -12,7 +12,7 @@ ends with `; b`).
 - `document-export-*.md` — PRD + the 30-hour implementation plan (gap tables, schedules)
 - `docs/EXECUTION_PLAN.md` — the phase-by-phase build plan and which skill drives each phase
 - `SPEC.md` — Path-Lang grammar + semantics, including decisions that close PRD gaps
-- `docs/TASKS.md` — ordered task backlog with acceptance criteria
+- `tasks/plan.md` + `tasks/todo.md` — dependency graph, vertical slices, checkpoints, backlog
 - `docs/adr/` — architecture decision records
 
 ## Quality bar
