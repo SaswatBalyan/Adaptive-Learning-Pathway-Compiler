@@ -27,11 +27,14 @@ using llvm::Type;
 using llvm::Value;
 
 // Build @print_binary(i32 %val): print %val in binary, no leading zeros
-// (0 prints as "0"), then a newline. Uses @putchar. (PRD 4.6, SPEC 2.5)
-Function *build_print_binary(llvm::Module &m, IRBuilder<> &b, Function *putchar_fn) {
+// (0 prints as "0"), then a newline, via libc @putchar. (PRD 4.6, SPEC 2.5)
+Function *build_print_binary(llvm::Module &m, IRBuilder<> &b) {
   llvm::LLVMContext &ctx = m.getContext();
   Type *i32 = b.getInt32Ty();
 
+  Function *putchar_fn =
+      Function::Create(FunctionType::get(i32, {i32}, false),
+                       Function::ExternalLinkage, "putchar", &m);
   Function *fn = Function::Create(FunctionType::get(b.getVoidTy(), {i32}, false),
                                   Function::InternalLinkage, "print_binary", &m);
   Value *val = fn->getArg(0);
@@ -104,15 +107,10 @@ std::string emit_ir(const Program &p, const std::string &module_name, bool &ok) 
   Type *i32 = b.getInt32Ty();
   Type *ptr = b.getPtrTy();
 
-  // External C library functions used by the generated program.
-  Function *putchar_fn = Function::Create(
-      FunctionType::get(i32, {i32}, false), Function::ExternalLinkage, "putchar",
-      module.get());
-  Function *printf_fn = Function::Create(FunctionType::get(i32, {ptr}, true),
-                                         Function::ExternalLinkage, "printf",
-                                         module.get());
-
-  Function *print_binary = build_print_binary(*module, b, putchar_fn);
+  // The generated program prints the score one of two ways; emit only what it
+  // uses so the .ll stays uncluttered.
+  Function *print_binary =
+      p.binary_output ? build_print_binary(*module, b) : nullptr;
 
   Function *main_fn =
       Function::Create(FunctionType::get(i32, {}, false),
@@ -187,6 +185,9 @@ std::string emit_ir(const Program &p, const std::string &module_name, bool &ok) 
   if (p.binary_output) {
     b.CreateCall(print_binary, {score});
   } else {
+    Function *printf_fn = Function::Create(FunctionType::get(i32, {ptr}, true),
+                                           Function::ExternalLinkage, "printf",
+                                           module.get());
     Value *fmt = b.CreateGlobalString("%d\n", ".dfmt", 0, module.get());
     b.CreateCall(printf_fn, {fmt, score});
   }

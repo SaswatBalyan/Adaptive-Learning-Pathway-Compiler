@@ -66,12 +66,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-5:** `make check-full` green — 36/36 fixtures, demo prints `1111`,
       full pipeline (tokens→trace→ast→ir→binary) demonstrable in one run
 
-## Phase 7 — Review & simplify   → CP-6
-- [ ] T7.1 `agent-skills:review` five-axis → `tasks/review-findings.md`
-- [ ] T7.2 fix correctness/security findings
-- [ ] T7.3 `agent-skills:code-simplify` pass
-- [ ] T7.4 `make check-full` green
-- [ ] **CP-6**
+## Phase 7 — Review & simplify   ✅ CP-6
+- [x] T7.1 five-axis review → `tasks/review-findings.md` (no Critical)
+- [x] T7.2 fixed: NUMBER overflow (atoi→strtol+range), `;b` glued-identifier
+      mis-lex (yyless), IDENT leak on error recovery (%destructor), parse-mode
+      exit codes. Regression fixtures added.
+- [x] T7.3 simplify: emit only the print helper the program uses (no dead
+      `@putchar`/`@print_binary`/`@printf` in the `.ll`); drop dead using/includes
+- [x] T7.4 `make check-full` green — 38/38 fixtures
+- [x] **CP-6**
 
 ## Phase 8 — Demo readiness   → CP-7
 - [ ] T8.1 `agent-skills:ship` pre-demo checklist
