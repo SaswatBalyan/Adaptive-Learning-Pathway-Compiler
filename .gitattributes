@@ -1,0 +1,11 @@
+# The MSYS2 toolchain (bash, make, flex, bison) chokes on CRLF. Force LF for
+# everything text so a checkout on any machine stays buildable.
+* text=auto eol=lf
+
+*.png binary
+*.svg text eol=lf
+*.edu text eol=lf
+Makefile text eol=lf
+*.sh text eol=lf
+*.l text eol=lf
+*.y text eol=lf
