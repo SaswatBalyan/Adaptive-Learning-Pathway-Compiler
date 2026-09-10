@@ -1,0 +1,640 @@
+<title>Adaptive Learning Pathway Compiler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  /* ---------- tokens: light is the base, both other states redefine ---------- */
+  :root {
+    --ground:      #fbfcfd;
+    --surface:     #eef3f5;
+    --surface-2:   #e4ecee;
+    --ink:         #16232b;
+    --ink-soft:    #56666f;
+    --ink-faint:   #85959c;
+    --line:        #d4dee2;
+    --accent:      #0e6b74;
+    --accent-ink:  #0a4f56;
+    --accent-wash: #e0eef0;
+    --signal:      #b5772a;   /* semantic: the binary-output payoff only */
+    --signal-wash: #f3e7d6;
+
+    --term-bg:   #0b1519;
+    --term-2:    #12222899;
+    --term-fg:   #cbd8dc;
+    --term-dim:  #6f8790;
+    --term-kw:   #5bbcc6;
+    --term-sig:  #e0a54a;
+    --term-num:  #b8c7cb;
+
+    --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --maxw: 47rem;
+    --shadow: 0 1px 2px rgba(20,40,50,.04), 0 8px 30px -18px rgba(20,40,50,.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0c1418;
+      --surface:     #131f24;
+      --surface-2:   #182831;
+      --ink:         #e4ecef;
+      --ink-soft:    #93a6ae;
+      --ink-faint:   #6a7c84;
+      --line:        #26333a;
+      --accent:      #47c5d1;
+      --accent-ink:  #82dbe2;
+      --accent-wash: #12303433;
+      --signal:      #e0a54a;
+      --signal-wash: #3a2c1533;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0c1418;
+    --surface:     #131f24;
+    --surface-2:   #182831;
+    --ink:         #e4ecef;
+    --ink-soft:    #93a6ae;
+    --ink-faint:   #6a7c84;
+    --line:        #26333a;
+    --accent:      #47c5d1;
+    --accent-ink:  #82dbe2;
+    --accent-wash: #12303433;
+    --signal:      #e0a54a;
+    --signal-wash: #3a2c1533;
+  }
+
+  /* ---------- reset-ish ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--accent-wash); }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ---------- type ---------- */
+  h1, h2, h3 { font-family: var(--font-mono); font-weight: 600; letter-spacing: -0.015em; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2rem, 6.5vw, 2.9rem); line-height: 1.08; }
+  h2 { font-size: 1.32rem; line-height: 1.2; letter-spacing: -0.01em; }
+  h3 { font-size: 1rem; font-weight: 500; }
+  p  { margin: 0; }
+  a  { color: var(--accent-ink); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  code, kbd, pre { font-family: var(--font-mono); }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .lead { font-size: 1.06rem; color: var(--ink-soft); max-width: 40rem; }
+
+  /* ---------- header / hero ---------- */
+  header { border-bottom: 1px solid var(--line); }
+  .hero { padding: 4.5rem 0 2.75rem; }
+  .hero .eyebrow { display: block; margin-bottom: 1.1rem; }
+  .hero h1 { margin-bottom: 1.1rem; }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .lead { margin-bottom: 0; }
+
+  .reveal { opacity: 0; transform: translateY(8px); animation: rise .6s cubic-bezier(.2,.6,.2,1) forwards; }
+  .reveal.d1 { animation-delay: .05s; }
+  .reveal.d2 { animation-delay: .12s; }
+  .reveal.d3 { animation-delay: .2s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } }
+
+  /* ---------- pipeline schematic ---------- */
+  .schematic { padding: 2.25rem 0 3rem; overflow-x: auto; }
+  .schematic-inner { min-width: 640px; }
+  svg .node-box   { fill: var(--surface); stroke: var(--line); }
+  svg .node-box.io { fill: var(--accent-wash); stroke: var(--accent); }
+  svg .node-name  { fill: var(--ink); font: 600 13px var(--font-mono); }
+  svg .node-sub   { fill: var(--ink-soft); font: 400 10.5px var(--font-mono); }
+  svg .node-exp   { fill: var(--accent-ink); font: 500 9.5px var(--font-mono); letter-spacing: .08em; }
+  svg .flow       { stroke: var(--ink-faint); stroke-width: 1.5; fill: none; }
+  svg .flow-head  { fill: var(--ink-faint); }
+  svg .payoff     { fill: var(--signal); font: 600 13px var(--font-mono); }
+
+  /* ---------- sections ---------- */
+  section { padding: 3rem 0; border-top: 1px solid var(--line); }
+  section > .wrap > .eyebrow { display: block; margin-bottom: .55rem; }
+  section > .wrap > h2 { margin-bottom: 1.5rem; }
+  .section-note { color: var(--ink-soft); margin-bottom: 1.75rem; max-width: 40rem; }
+
+  /* ---------- terminal panels ---------- */
+  .term {
+    background: var(--term-bg);
+    color: var(--term-fg);
+    border: 1px solid #1f3138;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.72;
+    overflow: hidden;
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .5rem .85rem;
+    background: var(--term-2);
+    border-bottom: 1px solid #1f3138;
+    color: var(--term-dim);
+    font-size: 11px;
+    letter-spacing: .04em;
+  }
+  .term-bar .dot { width: 6px; height: 6px; border-radius: 50%; background: #3a5158; flex: none; }
+  .term-body { padding: .85rem 1rem; overflow-x: auto; white-space: pre; }
+  .term-body .cmd { color: var(--term-fg); }
+  .term-body .cmd::before { content: "$ "; color: var(--term-kw); }
+  .term-body .out { color: var(--term-fg); }
+  .term-body .dim { color: var(--term-dim); }
+  .term-body .kw  { color: var(--term-kw); }
+  .term-body .sig { color: var(--term-sig); }
+  .term-body .cmt { color: var(--term-dim); font-style: italic; }
+  .term-body .big { font-size: 1.15rem; color: var(--term-sig); font-weight: 600; }
+
+  /* inline command chip */
+  .chip {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: .12rem .45rem;
+    font-size: .82em;
+    color: var(--ink);
+  }
+
+  /* ---------- quickstart ---------- */
+  .quickstart { display: grid; gap: 1rem; }
+  .req {
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+    padding: .7rem .9rem;
+    border-radius: 2px;
+  }
+
+  /* ---------- stage list ---------- */
+  .stages { display: grid; gap: 1.5rem; counter-reset: stage; }
+  .stage {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr;
+    gap: 0 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .stage:first-child { border-top: 0; padding-top: 0; }
+  .stage .idx {
+    font-family: var(--font-mono);
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--accent);
+    padding-top: .15rem;
+    position: relative;
+  }
+  .stage .idx::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem; top: .2rem;
+    width: 2px; height: 1.05rem;
+    background: var(--accent);
+  }
+  .stage .head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .55rem;
+    margin-bottom: .4rem;
+  }
+  .stage .head .exp {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    background: var(--accent-wash);
+    padding: .1rem .4rem;
+    border-radius: 2px;
+  }
+  .stage .what { color: var(--ink-soft); margin-bottom: .8rem; max-width: 38rem; }
+  .stage .cmd-line { margin-bottom: .7rem; font-size: .9rem; }
+  .stage .body { grid-column: 1 / -1; }
+  @media (max-width: 33rem) {
+    .stage { grid-template-columns: 1fr; gap: .5rem; }
+    .stage .idx::before { display: none; }
+    .stage .idx { padding-top: 0; }
+  }
+
+  /* ---------- source card ---------- */
+  .srccard {
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .srccard .srchead {
+    padding: .5rem .9rem;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .05em;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .srccard pre {
+    margin: 0; padding: .9rem 1rem;
+    font-size: 12.5px; line-height: 1.7;
+    overflow-x: auto;
+    color: var(--ink);
+  }
+  .srccard .k { color: var(--accent); font-weight: 500; }
+  .srccard .b { color: var(--signal); font-weight: 600; }
+  .srccard .c { color: var(--ink-faint); font-style: italic; }
+
+  /* ---------- wrong-input ---------- */
+  .grid2 { display: grid; gap: 1rem; }
+  @media (min-width: 40rem) { .grid2 { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+  /* ---------- checklist ---------- */
+  .facts { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .fact {
+    display: grid; grid-template-columns: 1fr auto; gap: 1rem;
+    padding: .7rem .95rem;
+    border-bottom: 1px solid var(--line);
+    font-size: .9rem;
+  }
+  .fact:last-child { border-bottom: 0; }
+  .fact .v { font-family: var(--font-mono); font-size: .84rem; color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; }
+  .fact .v.ok { color: var(--accent); }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2.5rem 0 3.5rem;
+    color: var(--ink-soft);
+    font-size: .86rem;
+  }
+  footer .wrap > * + * { margin-top: .6rem; }
+  footer code { color: var(--ink); }
+</style>
+
+<header>
+  <div class="wrap hero">
+    <span class="eyebrow reveal">BCSE307P · Compiler Design Lab · Experiments 7–10</span>
+    <h1 class="reveal d1">Adaptive Learning<br>Pathway <span class="accent">Compiler</span></h1>
+    <p class="lead reveal d2">
+      A Flex&nbsp;+&nbsp;Bison&nbsp;+&nbsp;LLVM compiler for <strong>Path-Lang</strong>, a small language
+      an educator uses to describe a student profile and adaptive branching. It lowers
+      <code>pathway.edu</code> to verified LLVM&nbsp;IR and a program that prints the student's
+      Alignment Score — in binary when a statement ends with <span class="chip">; b</span>.
+    </p>
+  </div>
+
+  <div class="wrap schematic reveal d3">
+    <div class="schematic-inner">
+      <svg viewBox="0 0 940 150" width="100%" role="img" aria-label="Compiler pipeline: source through lexer, parser, AST, codegen, to a running program">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="flow-head" d="M0 0 L10 5 L0 10 z"></path>
+          </marker>
+        </defs>
+        <!-- flow line -->
+        <line class="flow" x1="118" y1="62" x2="168" y2="62" marker-end="url(#ah)"></line>
+        <line class="flow" x1="286" y1="62" x2="316" y2="62" marker-end="url(#ah)"></line>
+        <line class="flow" x1="434" y1="62" x2="464" y2="62" marker-end="url(#ah)"></line>
+        <line class="flow" x1="582" y1="62" x2="612" y2="62" marker-end="url(#ah)"></line>
+        <line class="flow" x1="730" y1="62" x2="760" y2="62" marker-end="url(#ah)"></line>
+
+        <!-- source -->
+        <g>
+          <rect class="node-box io" x="6" y="40" width="112" height="44" rx="2"></rect>
+          <text class="node-name" x="62" y="60" text-anchor="middle">pathway.edu</text>
+          <text class="node-sub"  x="62" y="75" text-anchor="middle">source</text>
+        </g>
+        <!-- lexer -->
+        <g>
+          <rect class="node-box" x="168" y="40" width="118" height="44" rx="2"></rect>
+          <text class="node-name" x="227" y="58" text-anchor="middle">Lexer</text>
+          <text class="node-sub"  x="227" y="72" text-anchor="middle">token stream</text>
+          <text class="node-exp"  x="227" y="102" text-anchor="middle">FLEX · EXP 7</text>
+        </g>
+        <!-- parser -->
+        <g>
+          <rect class="node-box" x="316" y="40" width="118" height="44" rx="2"></rect>
+          <text class="node-name" x="375" y="58" text-anchor="middle">Parser</text>
+          <text class="node-sub"  x="375" y="72" text-anchor="middle">grammar + checks</text>
+          <text class="node-exp"  x="375" y="102" text-anchor="middle">BISON · EXP 7</text>
+        </g>
+        <!-- ast -->
+        <g>
+          <rect class="node-box" x="464" y="40" width="118" height="44" rx="2"></rect>
+          <text class="node-name" x="523" y="58" text-anchor="middle">AST · RTTI</text>
+          <text class="node-sub"  x="523" y="72" text-anchor="middle">typed tree</text>
+          <text class="node-exp"  x="523" y="102" text-anchor="middle">EXP 8</text>
+        </g>
+        <!-- codegen -->
+        <g>
+          <rect class="node-box" x="612" y="40" width="118" height="44" rx="2"></rect>
+          <text class="node-name" x="671" y="58" text-anchor="middle">Codegen</text>
+          <text class="node-sub"  x="671" y="72" text-anchor="middle">pathway.ll</text>
+          <text class="node-exp"  x="671" y="102" text-anchor="middle">LLVM · EXP 9</text>
+        </g>
+        <!-- run -->
+        <g>
+          <rect class="node-box io" x="760" y="40" width="112" height="44" rx="2"></rect>
+          <text class="node-name" x="816" y="58" text-anchor="middle">Run</text>
+          <text class="payoff"    x="816" y="75" text-anchor="middle">1111</text>
+          <text class="node-exp"  x="816" y="102" text-anchor="middle">EXP 10</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ============ QUICKSTART ============ -->
+  <section id="run">
+    <div class="wrap">
+      <span class="eyebrow">Run the demonstration</span>
+      <h2>Two commands</h2>
+      <p class="section-note">
+        From the repository root. The <code>Makefile</code> puts the MSYS2 toolchain on
+        <code>PATH</code> itself, so this works from any shell.
+      </p>
+
+      <div class="quickstart">
+        <div class="term">
+          <div class="term-bar"><span class="dot"></span> repo root</div>
+          <div class="term-body"><span class="cmd">make</span>
+<span class="dim">          # build ./alpc</span>
+<span class="cmd">make demo</span>
+<span class="dim">          # compile &amp; run examples/pathway.edu</span>
+
+<span class="out">examples/pathway.edu compiles, verifies, runs -&gt; </span><span class="big">1111</span></div>
+        </div>
+
+        <p class="req">Needs&nbsp; flex&nbsp;2.6 · bison&nbsp;3.8 · make · g++ · LLVM&nbsp;22 (llvm-as, opt, lli).&nbsp; On Linux the distro packages suffice; the Windows setup is in <code>docs/adr/0001</code>.</p>
+      </div>
+
+      <p class="section-note" style="margin-top:1.75rem;margin-bottom:.9rem">
+        <strong>Why <code>1111</code>:</strong> the profile has <code>performance&nbsp;=&nbsp;60</code>, so
+        <code>IF performance &lt; 70 GOTO remedial</code> is taken. The score is
+        <code>state = 0 + 15 = 15</code>, and the program ended with <span class="chip">; b</span> —
+        so it prints 15 in binary. This is the PRD's worked example.
+      </p>
+
+      <div class="srccard">
+        <div class="srchead">examples/pathway.edu</div>
+<pre><span class="c"># Backward Design: every outcome is declared before a rule targets it.</span>
+<span class="k">OUTCOME</span> remedial;
+<span class="k">OUTCOME</span> core;
+<span class="k">OUTCOME</span> advanced;
+
+<span class="k">SET</span> grade_level = 5;
+<span class="k">SET</span> performance = 60;
+
+<span class="k">SET</span> state = 0;
+<span class="k">SET</span> state += 15;       <span class="c"># the Fusion Function</span>
+
+<span class="k">IF</span> performance &lt; 70   <span class="k">GOTO</span> remedial;
+<span class="k">IF</span> performance &gt; 85   <span class="k">GOTO</span> advanced;
+<span class="k">IF</span> performance &lt; 1000 <span class="k">GOTO</span> core;<span class="b"> b</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FIVE STAGES ============ -->
+  <section id="stages">
+    <div class="wrap">
+      <span class="eyebrow">One source, five inspectable artifacts</span>
+      <h2>Walk the pipeline</h2>
+      <p class="section-note">
+        Each stage prints something you can show on its own. Run them in order against the
+        same <code>examples/pathway.edu</code>.
+      </p>
+
+      <div class="stages">
+
+        <!-- 1 -->
+        <div class="stage">
+          <div class="idx">01</div>
+          <div>
+            <div class="head"><h3>Lexical analysis</h3><span class="exp">Flex · Exp 7</span></div>
+            <p class="what">
+              <code>scanner.l</code> turns the source into tokens: the keywords, identifiers,
+              numbers, the comparators, and the custom <code>; b</code> binary-output terminator
+              (<code>SEMI_B</code>).
+            </p>
+            <p class="cmd-line"><span class="chip">./alpc --dump-tokens examples/pathway.edu</span></p>
+          </div>
+          <div class="body">
+            <div class="term">
+              <div class="term-bar"><span class="dot"></span> token stream</div>
+              <div class="term-body"><span class="dim">line  3:</span> <span class="kw">OUTCOME</span> "OUTCOME"
+<span class="dim">line  3:</span> IDENT   "remedial"
+<span class="dim">line  3:</span> SEMI    ";"
+<span class="dim">      ⋮</span>
+<span class="dim">line 13:</span> <span class="kw">SET</span> "SET"
+<span class="dim">line 13:</span> IDENT   "state"
+<span class="dim">line 13:</span> ADD_ASSIGN "+="
+<span class="dim">line 13:</span> NUMBER  "15"
+<span class="dim">      ⋮</span>
+<span class="dim">line 18:</span> IDENT   "core"
+<span class="dim">line 18:</span> <span class="sig">SEMI_B  "; b"</span>
+EOF</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="stage">
+          <div class="idx">02</div>
+          <div>
+            <div class="head"><h3>Syntax analysis &amp; Backward Design</h3><span class="exp">Bison · Exp 7</span></div>
+            <p class="what">
+              <code>parser.y</code> is an LALR(1) grammar with <strong>zero conflicts</strong>. Each
+              trace line is a reduction. The Backward Design rule — a <code>GOTO</code> may only
+              target an already-declared <code>OUTCOME</code> — is enforced here.
+            </p>
+            <p class="cmd-line"><span class="chip">./alpc --parse-trace examples/pathway.edu</span></p>
+          </div>
+          <div class="body">
+            <div class="term">
+              <div class="term-bar"><span class="dot"></span> reduction trace</div>
+              <div class="term-body"><span class="out">outcome remedial
+outcome core
+outcome advanced
+set grade_level = 5
+set performance = 60
+set state = 0
+set state += 15
+branch performance &lt; 70 -&gt; remedial
+branch performance &gt; 85 -&gt; advanced
+branch performance &lt; 1000 -&gt; core
+</span><span class="sig">binary-output</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="stage">
+          <div class="idx">03</div>
+          <div>
+            <div class="head"><h3>AST construction &amp; RTTI</h3><span class="exp">Exp 8</span></div>
+            <p class="what">
+              Three node kinds — <code>ProfileSet</code>, <code>CondBranch</code>,
+              <code>Outcome</code>. The dump walks the tree through <strong>LLVM-style RTTI</strong>
+              (<code>NodeKind</code> tag + <code>classof</code> + <code>isa&lt;&gt;</code>/<code>dyn_cast&lt;&gt;</code>) —
+              no <code>dynamic_cast</code>, no <code>-frtti</code>.
+            </p>
+            <p class="cmd-line"><span class="chip">./alpc --dump-ast examples/pathway.edu</span></p>
+          </div>
+          <div class="body">
+            <div class="term">
+              <div class="term-bar"><span class="dot"></span> AST dump</div>
+              <div class="term-body"><span class="out">Program binary_output=1
+  Outcome     line=3   name="remedial"
+  Outcome     line=4   name="core"
+  Outcome     line=5   name="advanced"
+  ProfileSet  line=8   name="grade_level" op="="  value=5
+  ProfileSet  line=9   name="performance" op="="  value=60
+  ProfileSet  line=12  name="state"       op="="  value=0
+  ProfileSet  line=13  name="state"       op="+=" value=15
+  CondBranch  line=16  var="performance" rel="&lt;" value=70   target="remedial"
+  CondBranch  line=17  var="performance" rel="&gt;" value=85   target="advanced"
+  CondBranch  line=18  var="performance" rel="&lt;" value=1000 target="core"</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="stage">
+          <div class="idx">04</div>
+          <div>
+            <div class="head"><h3>LLVM IR code generation</h3><span class="exp">LLVM · Exp 9</span></div>
+            <p class="what">
+              <code>codegen.cpp</code> emits one <code>alloca</code> per variable,
+              <code>load</code>/<code>add</code>/<code>store</code> for the Fusion Function, and
+              <code>icmp</code> + conditional <code>br</code> into a basic block per outcome. Every
+              path converges on <code>prog_end</code>, which loads the score. The output passes
+              <code>opt -passes=verify</code>.
+            </p>
+            <p class="cmd-line"><span class="chip">./alpc --emit-ir examples/pathway.edu</span></p>
+          </div>
+          <div class="body">
+            <div class="term">
+              <div class="term-bar"><span class="dot"></span> pathway.ll · @main (excerpt)</div>
+              <div class="term-body"><span class="dim">define i32 @main() {</span>
+<span class="dim">entry:</span>
+  %state = <span class="kw">alloca</span> i32
+  <span class="kw">store</span> i32 0, ptr %state
+  %state.cur = <span class="kw">load</span> i32, ptr %state
+  %fusion = <span class="kw">add</span> i32 %state.cur, 15      <span class="cmt">; state += 15</span>
+  <span class="kw">store</span> i32 %fusion, ptr %state
+  %p = <span class="kw">load</span> i32, ptr %performance
+  %cond = <span class="kw">icmp</span> slt i32 %p, 70
+  <span class="kw">br</span> i1 %cond, label %outcome.remedial, label %after0
+<span class="dim">        ⋮</span>
+<span class="dim">prog_end:</span>
+  %score = <span class="kw">load</span> i32, ptr %state
+  <span class="kw">call</span> void <span class="sig">@print_binary</span>(i32 %score)
+  <span class="kw">ret</span> i32 %score
+<span class="dim">}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 -->
+        <div class="stage">
+          <div class="idx">05</div>
+          <div>
+            <div class="head"><h3>Binary-output trigger &amp; run</h3><span class="exp">Exp 10</span></div>
+            <p class="what">
+              Because a statement used <code>; b</code>, <code>prog_end</code> calls
+              <code>@print_binary</code> — an in-IR bit loop over <code>@putchar</code>. Execute
+              the module with <code>lli</code> (or <code>clang pathway.ll -o pathway</code>).
+            </p>
+            <p class="cmd-line"><span class="chip">./alpc --emit-ir examples/pathway.edu &gt; pathway.ll &amp;&amp; lli pathway.ll</span></p>
+          </div>
+          <div class="body">
+            <div class="term">
+              <div class="term-bar"><span class="dot"></span> console</div>
+              <div class="term-body"><span class="big">1111</span></div>
+            </div>
+            <p class="what" style="margin-top:.9rem;margin-bottom:0">
+              Binary conversion is checked for the PRD values:
+              <code>0&nbsp;→&nbsp;0</code>,&nbsp; <code>1&nbsp;→&nbsp;1</code>,&nbsp;
+              <code>15&nbsp;→&nbsp;1111</code>,&nbsp; <code>255&nbsp;→&nbsp;11111111</code>.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WRONG INPUT ============ -->
+  <section id="rejects">
+    <div class="wrap">
+      <span class="eyebrow">Malformed input never crashes</span>
+      <h2>It rejects, it doesn't fall over</h2>
+      <p class="section-note">
+        One clear <code>line N:</code> diagnostic, a non-zero exit, no stack trace. Ten invalid
+        fixtures cover every rule.
+      </p>
+
+      <div class="grid2">
+        <div class="srccard">
+          <div class="srchead">tests/fixtures/invalid/backward_design.edu</div>
+<pre><span class="k">OUTCOME</span> core;
+<span class="k">SET</span> performance = 90;
+<span class="k">IF</span> performance &lt; 70 <span class="k">GOTO</span> remedial;</pre>
+        </div>
+        <div class="term">
+          <div class="term-bar"><span class="dot"></span> ./alpc … ; echo "exit $?"</div>
+          <div class="term-body"><span class="sig">line 3: Backward Design violation:</span>
+<span class="sig">  'remedial' is referenced before it is</span>
+<span class="sig">  declared as an OUTCOME</span>
+<span class="out">exit 1</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FACTS ============ -->
+  <section id="check">
+    <div class="wrap">
+      <span class="eyebrow">One command for the whole suite</span>
+      <h2>What the gate checks</h2>
+      <p class="section-note"><span class="chip">make check</span> for the fast gate, <span class="chip">make check-full</span> to add the sanitized run, cppcheck, and the demo.</p>
+
+      <div class="facts">
+        <div class="fact"><span>Fixture checks (goldens · IR verify · run)</span><span class="v ok">42 / 42</span></div>
+        <div class="fact"><span>RTTI unit assertions (UBSan + libstdc++ assertions)</span><span class="v ok">19 / 19</span></div>
+        <div class="fact"><span>Bison shift/reduce &amp; reduce/reduce conflicts</span><span class="v ok">0</span></div>
+        <div class="fact"><span>Compiler warnings on hand-written sources <span style="color:var(--ink-faint)">(-Wall -Wextra -Werror)</span></span><span class="v ok">0</span></div>
+        <div class="fact"><span>Random-input fuzz across every mode</span><span class="v ok">no crash / hang</span></div>
+        <div class="fact"><span>Clean-slate <code>make check-full</code></span><span class="v">≈ 52 s</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Toolchain.</strong> Flex 2.6.4 · Bison 3.8.2 · LLVM 22.1.8 · GCC 16.2 (MSYS2). Codegen targets the LLVM 22.x C++ API; the surface used is stable across many majors, and any drift is confined to <code>codegen.cpp</code>.</p>
+    <p><strong>Language decisions.</strong> The scoring model — a single <code>state</code> variable, <code>SET x += n</code> as the Fusion Function, <code>GOTO</code> targeting a declared <code>OUTCOME</code> — is documented in <code>SPEC.md §2</code> and <code>docs/adr/0002</code>.</p>
+    <p><strong>Repository.</strong> <code>README.md</code> · <code>docs/DEMO.md</code> (this walkthrough in plain text) · <code>docs/adr/0001–0004</code> · <code>tasks/plan.md</code>.</p>
+  </div>
+</footer>
