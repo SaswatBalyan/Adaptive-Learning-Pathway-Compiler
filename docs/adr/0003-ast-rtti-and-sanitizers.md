@@ -13,7 +13,7 @@ Status: accepted
 - Node fields are `const`; the tree is built once in parser actions and only read
   afterward (dump, semantic check, codegen).
 
-## RTTI (Exp 8)
+## RTTI
 
 Follows the LLVM-style RTTI idiom exactly
 (https://llvm.org/docs/HowToSetUpLLVMStyleRTTI.html):
@@ -23,8 +23,7 @@ Follows the LLVM-style RTTI idiom exactly
 - `const NodeKind kind_` set by the protected `ASTNode` constructor.
 - `static bool classof(const ASTNode*)` on each leaf: `kind() == NK_X`.
 - Free `isa<T>` / `dyn_cast<T>` / `cast<T>` templates in `ast.h`; `isa` is
-  null-safe, `cast` asserts. **No `dynamic_cast`, no `-frtti`** — that is the
-  point of the experiment.
+  null-safe, `cast` asserts. **No `dynamic_cast`, no `-frtti`**.
 
 Static semantics run as one source-order pass (`check_program`) that dispatches on
 node kind via `dyn_cast`. Document order reproduces the "declared before

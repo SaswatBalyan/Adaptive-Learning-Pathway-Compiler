@@ -4,7 +4,7 @@
 
 ## 1. Overview & Vision
 
-Build the **Adaptive Learning Pathway Compiler (ALPC)**, a simplified Domain-Specific Language (DSL) compiler for **"Path-Lang"** — a language educators use to describe student profiles and adaptive branching logic. ALPC translates Path-Lang source into **LLVM Intermediate Representation (IR)**, simulating how a student's performance state evolves as they move through a learning pathway. The project is scoped to fit the **30-hour Compiler Design Lab (BCSE307P)** requirement and is designed to walk through the full compiler pipeline — lexing, parsing, AST construction with RTTI, and IR code generation — using a concrete, demonstrable educational scenario rather than a generic toy language.
+Build the **Adaptive Learning Pathway Compiler (ALPC)**, a simplified Domain-Specific Language (DSL) compiler for **"Path-Lang"** — a language educators use to describe student profiles and adaptive branching logic. ALPC translates Path-Lang source into **LLVM Intermediate Representation (IR)**, simulating how a student's performance state evolves as they move through a learning pathway. The project is scoped to fit a **30-hour compiler design lab** requirement and is designed to walk through the full compiler pipeline — lexing, parsing, AST construction with RTTI, and IR code generation — using a concrete, demonstrable educational scenario rather than a generic toy language.
 
 ## 2. Research Inspiration
 
@@ -22,8 +22,8 @@ The Compiler Design Lab curriculum requires students to build a working lexer �
 
 ## 4. Target Users
 
-- **Lab Student (Implementer):** Builds and demonstrates the compiler to satisfy the BCSE307P lab requirements.
-- **Lab Evaluator / Faculty:** Assesses whether each experiment (Flex, Bison, RTTI, IR/Assembler) is correctly implemented and demonstrated.
+- **Implementer:** Builds and demonstrates the compiler.
+- **Evaluator:** Assesses whether each phase (Flex, Bison, RTTI, IR/Assembler) is correctly implemented and demonstrated.
 - **Educator (DSL End User, conceptual):** The persona Path-Lang is written for — defines student profiles and adaptive rules in a readable, domain-specific syntax.
 
 ---
@@ -44,7 +44,7 @@ The Compiler Design Lab curriculum requires students to build a working lexer �
 ### 5.2 Non-Functional Requirements
 
 - **Scope:** Implementation must be completable within the 30-hour lab time budget
-- **Curriculum Fit:** Each phase must map cleanly onto a specific Indicative Experiment (Exp. 7–10) in BCSE307P
+- **Curriculum Fit:** Each phase maps to a specific compiler phase (lexing, parsing, AST/RTTI, codegen)
 - **Toolchain:** Must build with standard Flex, Bison, and the LLVM C++ API/toolchain available in the lab environment
 - **Correctness:** Grammar must reject pathways that violate Backward Design ordering (activity before outcome)
 - **Demonstrability:** Every stage (tokens, parse tree, AST, IR, final binary output) must be independently showable to an evaluator, not just the final result
@@ -107,12 +107,12 @@ The Compiler Design Lab curriculum requires students to build a working lexer �
   - `pathway.edu` — sample Path-Lang source file for demonstration
 - **Curriculum Mapping:**
 
-| Phase | Lab Experiment | Implementation Detail |
-|---|---|---|
-| Lexical Analysis | Exp 7: Intro to Flex | Tokens for `OUTCOME`, `GOTO`, and the `; b` binary terminator |
-| Syntax Analysis | Exp 7: Intro to Bison | CFG enforcing Backward Design (outcomes before activities) |
-| AST & RTTI | Exp 8: LLVM-style RTTI | AST nodes for curriculum stages, traversed via RTTI |
-| Code Generation | Exp 9 & 10: IR & Assembler | AST → LLVM IR modeling the Fusion Function; binary output logic |
+| Phase | Implementation Detail |
+|---|---|
+| Lexical Analysis | Tokens for `OUTCOME`, `GOTO`, and the `; b` binary terminator |
+| Syntax Analysis | CFG enforcing Backward Design (outcomes before activities) |
+| AST & RTTI | AST nodes for curriculum stages, traversed via RTTI |
+| Code Generation | AST → LLVM IR modeling the Fusion Function; binary output logic |
 
 - **Deployment / Demo Strategy:** No runtime service — this is a lab artifact. Demonstrated by compiling and running `pathway.edu` locally and showing intermediate outputs (tokens, parse tree, AST dump, `.ll` IR, final binary result) at each stage.
 

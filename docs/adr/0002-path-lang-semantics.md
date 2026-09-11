@@ -16,7 +16,7 @@ and documented rather than left ambiguous or resolved by interview.
    `SET IDENT -= NUMBER` (tokens `ADD_ASSIGN`, `SUB_ASSIGN`). The Fusion Function is
    the accumulated effect of these updates on the state variable. No general
    expression grammar (kept out of scope; would blow the 30-hour budget and the
-   Exp 7 grammar-simplicity goal).
+   the grammar-simplicity goal).
 
 2. **Student State / Alignment Score.** One distinguished i32 variable `state`,
    initialized to 0. `SET state = / += / -= n` is the only thing that changes the

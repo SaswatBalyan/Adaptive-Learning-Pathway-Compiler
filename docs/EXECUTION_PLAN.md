@@ -1,7 +1,7 @@
 # ALPC — Execution Plan
 
 Greenfield build of the Adaptive Learning Pathway Compiler: Flex + Bison + LLVM C++
-pipeline for Path-Lang, scoped to BCSE307P experiments 7–10.
+pipeline for Path-Lang, scoped to a 30-hour timeline.
 
 Environment decision: install MSYS2 + LLVM via winget; build/run/test locally on Windows.
 Spec-gap decision: pick sensible defaults, document them in `SPEC.md`, proceed.
@@ -10,13 +10,13 @@ Spec-gap decision: pick sensible defaults, document them in `SPEC.md`, proceed.
 |---|---|---|---|---|
 | **0. Environment & foundation** | Working toolchain + repo scaffold + quality bar | MSYS2/LLVM installed, `Makefile` stub, `CONSTRAINTS.md`, dir layout, git | infra |
 | **1. Spec & task breakdown** | Close PRD ambiguities; ordered backlog | `SPEC.md` (grammar EBNF, token table, scoring model, GOTO / Backward-Design rules, `; b` semantics, error handling), `docs/TASKS.md` | all Epics |
-| **2. Lexer** | Tokenize Path-Lang incl. `; b` | `src/scanner.l`, `--dump-tokens` mode, token-stream fixtures | Exp 7 (Flex), Epic 1 |
-| **3. Parser + Backward Design** | CFG + outcome-ordering check + error recovery | `src/parser.y`, outcome registry, `--parse-trace` mode, valid/invalid fixtures | Exp 7 (Bison), Epic 1 |
-| **4. AST + RTTI** | Node hierarchy, LLVM-style `classof`/`isa<>`/`dyn_cast<>`, traversal | `src/ast.h`, `src/ast.cpp`, `--dump-ast` mode, RTTI/traversal unit tests | Exp 8, Epic 2 |
-| **5. LLVM IR codegen** | Lower AST → `pathway.ll` (alloca/store, icmp/br, basic blocks) | `src/codegen.cpp`, valid `.ll` passing `opt -verify` | Exp 9, Epic 3 |
-| **6. Binary output + end-to-end** | `; b` → binary print; one-command build & run | `@print_binary` IR, `examples/pathway.edu`, working `Makefile`, executable prints `1111` | Exp 10, Epic 4 |
+| **2. Lexer** | Tokenize Path-Lang incl. `; b` | `src/scanner.l`, `--dump-tokens` mode, token-stream fixtures | Lexer (Flex), Epic 1 |
+| **3. Parser + Backward Design** | CFG + outcome-ordering check + error recovery | `src/parser.y`, outcome registry, `--parse-trace` mode, valid/invalid fixtures | Parser (Bison), Epic 1 |
+| **4. AST + RTTI** | Node hierarchy, LLVM-style `classof`/`isa<>`/`dyn_cast<>`, traversal | `src/ast.h`, `src/ast.cpp`, `--dump-ast` mode, RTTI/traversal unit tests | AST/RTTI, Epic 2 |
+| **5. LLVM IR codegen** | Lower AST → `pathway.ll` (alloca/store, icmp/br, basic blocks) | `src/codegen.cpp`, valid `.ll` passing `opt -verify` | Codegen, Epic 3 |
+| **6. Binary output + end-to-end** | `; b` → binary print; one-command build & run | `@print_binary` IR, `examples/pathway.edu`, working `Makefile`, executable prints `1111` | Binary output, Epic 4 |
 | **7. Review & simplify** | Correctness/readability/architecture/security/performance pass, then trim | review report, fixes applied | quality |
-| **8. Demo readiness** | Evaluator walkthrough of all 5 artifacts in one run | `README.md`, `docs/DEMO.md` (step → Exp mapping), ADRs for grammar/scoring choices | Success Metrics |
+| **8. Demo readiness** | Evaluator walkthrough of all 5 artifacts in one run | `README.md`, `docs/DEMO.md` (step → phase mapping), ADRs for grammar/scoring choices | Success Metrics |
 
 ## Gap resolutions to be finalized in Phase 1 (`SPEC.md`)
 

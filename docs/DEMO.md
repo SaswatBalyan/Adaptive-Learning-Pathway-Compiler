@@ -1,7 +1,7 @@
 # ALPC — Evaluator Demonstration
 
 One `pathway.edu` source, walked through every compiler phase. Each step produces
-an artifact you can inspect on its own, mapped to its BCSE307P experiment.
+an artifact you can inspect on its own.
 
 ```sh
 make            # build ./alpc
@@ -27,7 +27,7 @@ IF performance < 1000 GOTO core; b
 
 ---
 
-## 1 · Lexical analysis — Exp 7 (Flex)
+## 1 · Lexical analysis (Flex)
 
 ```sh
 ./alpc --dump-tokens examples/pathway.edu
@@ -47,7 +47,7 @@ EOF
 comparators `< > ==`, `= += -=`, and the custom **`; b`** binary-output
 terminator. Point out `SEMI_B` on the last line.
 
-## 2 · Syntax analysis + Backward Design — Exp 7 (Bison)
+## 2 · Syntax analysis + Backward Design — (Bison)
 
 ```sh
 ./alpc --parse-trace examples/pathway.edu
@@ -83,7 +83,7 @@ exit 1
 `bison` reports **zero** shift/reduce and reduce/reduce conflicts
 (`make` fails otherwise — `CONSTRAINTS.md` F2).
 
-## 3 · AST construction + RTTI — Exp 8
+## 3 · AST construction + RTTI
 
 ```sh
 ./alpc --dump-ast examples/pathway.edu
@@ -109,7 +109,7 @@ stage. The dump walks the tree through **LLVM-style RTTI**: `ast.h` has a
 `cast<>` — **no `dynamic_cast`, no `-frtti`**. `tests/unit_ast.cpp` asserts the
 RTTI behaviour (run under UBSan + libstdc++ assertions via `make test-asan`).
 
-## 4 · LLVM IR code generation — Exp 9
+## 4 · LLVM IR code generation
 
 ```sh
 ./alpc --emit-ir examples/pathway.edu | tee pathway.ll
@@ -126,7 +126,7 @@ In `@main` (see `codegen.cpp`, ADR 0004):
 - every `outcome.<name>` block and the fall-through path converge on `prog_end`,
   which loads the final `state` (the **Alignment Score**).
 
-## 5 · Binary-output trigger + run — Exp 10
+## 5 · Binary-output trigger + run
 
 ```sh
 lli pathway.ll        # or: make demo

@@ -13,7 +13,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] tasks/plan.md — dependency graph, vertical slices, checkpoints
 - [x] tasks/todo.md
 
-## Phase 2 — Lexer (Exp 7 / Flex)   ✅ CP-1
+## Phase 2 — Lexer (Flex)   ✅ CP-1
 - [x] T2.1 diagnostics module (`src/diagnostics.{h,cpp}`)
 - [x] T2.2 token set + `src/scanner.l` skeleton (line tracking, comments, ws, EOF)
 - [x] T2.3 `--dump-tokens` mode + driver bootstrap + Makefile wiring
@@ -22,7 +22,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-1:** `make check` green (6/6); bad-char → `line 1: unexpected character '$'`, exit 1;
       build `-Werror` clean, flex clean, cppcheck clean
 
-## Phase 3 — Parser + Backward Design (Exp 7 / Bison)   ✅ CP-2
+## Phase 3 — Parser + Backward Design (Bison)   ✅ CP-2
 - [x] T3.1 grammar productions + `--parse-trace`; `bison` zero conflicts/warnings
 - [x] T3.2 wire scanner↔parser via parser.tab.h; `--dump-tokens` regression green
 - [x] T3.3 outcome registry + Backward Design check
@@ -32,7 +32,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-2:** `make check` 18/18; bison conflict-free; 120-run fuzz clean (no crash/hang);
       diagnostics doc-backed against Bison 3.8.2 info manual
 
-## Phase 4 — AST + RTTI (Exp 8)   ✅ CP-3
+## Phase 4 — AST + RTTI   ✅ CP-3
 - [x] T4.1 `src/ast.{h,cpp}`: NodeKind + ProfileSet/CondBranch/Outcome, LLVM-style
       `classof`/`isa`/`cast`/`dyn_cast` (no dynamic_cast, no -frtti) — verified against
       llvm.org/docs/HowToSetUpLLVMStyleRTTI.html
@@ -45,7 +45,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
       cppcheck clean. UBSan-trap + `_GLIBCXX_ASSERTIONS` (mingw has no libasan; real ASan
       via `make test-asan SAN='-fsanitize=address,undefined'` on Linux)
 
-## Phase 5 — LLVM IR codegen (Exp 9)   ✅ CP-4
+## Phase 5 — LLVM IR codegen   ✅ CP-4
 - [x] T5.1 `src/codegen.{h,cpp}`: LLVMContext/Module/IRBuilder, `@main`, `Module::print`;
       LLVM 22 API verified against installed headers. Link `-lLLVM-22`.
 - [x] T5.2 `SET` + `+=`/`-=` → alloca (hoisted, zero-init) / store / load+add|sub+store
@@ -56,7 +56,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 - [x] **CP-4:** 28/28 fixture checks (plain + sanitized). 21/21 fuzz programs verify-clean.
       SPEC 2.1 example fixed (no dup outcome; catch-all `IF < 1000`).
 
-## Phase 6 — Binary output + end-to-end (Exp 10)   ✅ CP-5
+## Phase 6 — Binary output + end-to-end   ✅ CP-5
 - [x] T6.1 `@print_binary` bit loop — fixtures binary_zero/one/fifteen/255
       (0→0, 1→1, 15→1111, 255→11111111) all verified via lli
 - [x] T6.2 `; b` program flag → `@print_binary` vs `@printf "%d\n"` at prog_end
@@ -79,7 +79,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done. Detail in `tasks/plan.md`
 ## Phase 8 — Demo readiness   ✅ CP-7
 - [x] T8.1 ship checklist → `tasks/ship-decision.md` (GO; no blockers). Coverage-gap
       fixtures added: empty_program, semib_at_eof, negative_score, multi_binary
-- [x] T8.2 `docs/DEMO.md` — 5 artifacts in sequence, each labeled by Exp, + invalid-input demos
+- [x] T8.2 `docs/DEMO.md` — 5 artifacts in sequence, each labeled by phase, + invalid-input demos
 - [x] T8.3 `README.md`
 - [x] T8.4 ADRs 0001–0004 in `docs/adr/`; README points at the demo documentation
 - [x] **CP-7:** `make demo` and every `docs/DEMO.md` command verified; 42/42 fixtures

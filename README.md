@@ -6,15 +6,15 @@ educator describes a student profile and adaptive branching logic. ALPC lowers a
 prints a student's *Alignment Score* — in **binary** when a statement ends with
 `; b`.
 
-Built for the 30-hour **Compiler Design Lab (BCSE307P)**; each pipeline stage maps
-onto a lab experiment:
+A compiler that walks through every classic compiler phase: lexing (Flex), parsing (Bison),
+AST construction with RTTI, and LLVM IR code generation.
 
-| Stage | Experiment | Entry point |
-|---|---|---|
-| Lexical analysis (Flex) | Exp 7 | `alpc --dump-tokens` |
-| Syntax analysis + Backward-Design check (Bison) | Exp 7 | `alpc --parse-trace` |
-| AST with LLVM-style RTTI | Exp 8 | `alpc --dump-ast` |
-| LLVM IR code generation + binary-output trigger | Exp 9 & 10 | `alpc --emit-ir` (default) |
+| Stage | Entry point |
+|---|---|
+| Lexical analysis (Flex) | `alpc --dump-tokens` |
+| Syntax analysis + Backward-Design check (Bison) | `alpc --parse-trace` |
+| AST with LLVM-style RTTI | `alpc --dump-ast` |
+| LLVM IR code generation + binary-output trigger | `alpc --emit-ir` (default) |
 
 ## Quick start
 
@@ -41,10 +41,10 @@ examples/pathway.edu compiles, verifies, runs -> 1111
 
 | Command | Description |
 |---|---|
-| `alpc FILE` / `alpc --emit-ir FILE` | Emit LLVM IR to stdout (Exp 9) |
-| `alpc --dump-tokens FILE` | Token stream (Exp 7) |
-| `alpc --parse-trace FILE` | Reduction trace (Exp 7) |
-| `alpc --dump-ast FILE` | RTTI-driven AST dump (Exp 8) |
+| `alpc FILE` / `alpc --emit-ir FILE` | Emit LLVM IR to stdout |
+| `alpc --dump-tokens FILE` | Token stream |
+| `alpc --parse-trace FILE` | Reduction trace |
+| `alpc --dump-ast FILE` | RTTI-driven AST dump |
 | `alpc --parse FILE` | Parse + static-semantic checks only |
 | `alpc --help` | Usage |
 

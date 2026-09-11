@@ -1,7 +1,7 @@
 # Ship Decision: GO
 
 Scope: ALPC v1 — the full lexer → parser → AST/RTTI → LLVM IR pipeline for the
-BCSE307P lab demo. "Ship" here = ready to present to the evaluator.
+compiler demo. "Ship" here = ready to present to the evaluator.
 
 The decision is based on the code review in `tasks/review-findings.md`, together
 with the security and test-coverage checks below.
@@ -65,8 +65,7 @@ versions.
 ## Documentation
 
 - `README.md` — build, run, layout, LLVM-version note.
-- `docs/DEMO.md` — the evaluator walkthrough: five artifacts in sequence, each
-  labeled with its lab experiment, plus the invalid-input demonstrations.
+- `docs/DEMO.md` — the evaluator walkthrough: five artifacts in sequence, plus the invalid-input demonstrations.
 - `docs/adr/0001`–`0004` — toolchain, Path-Lang semantics, AST/RTTI + sanitizers,
   codegen control-flow.
 - `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`, `tasks/review-findings.md`.

@@ -14,7 +14,7 @@ a constraint to make a change pass — fix the code or raise the issue.
 |---|---|---|---|
 | F1 | Build completes with **zero** `-Wall -Wextra` warnings (hand-written `.cpp`/`.h`; generated Flex/Bison sources exempt) | `make` (uses `-Wall -Wextra -Werror` on our sources) | Warnings in a compiler are usually real bugs (uninit reads, sign mismatch in token codes). |
 | F2 | **Zero** Bison shift/reduce and reduce/reduce conflicts | `bison -Wcounterexamples -Werror=conflicts-sr -Werror=conflicts-rr parser.y` | An ambiguous grammar silently mis-parses; the lab is graded on grammar correctness. |
-| F3 | Generated IR is valid | `llvm-as pathway.ll -o /dev/null` and `opt -passes=verify pathway.ll -o /dev/null` | An `.ll` that fails the verifier is not a demonstrable Exp 9 artifact. |
+| F3 | Generated IR is valid | `llvm-as pathway.ll -o /dev/null` and `opt -passes=verify pathway.ll -o /dev/null` | An `.ll` that fails the verifier is not a demonstrable codegen artifact. |
 | F4 | No crash / hang on any fixture (valid or invalid) | `tests/run.sh` (each fixture: exit 0 for valid, non-zero + diagnostic for invalid, no SIGSEGV/SIGABRT, 5s timeout) | PRD NFR: "malformed input produces a clear syntax error rather than a crash". |
 | F5 | Every acceptance-criterion behaviour has ≥1 valid **and** ≥1 invalid fixture where meaningful | `tests/run.sh --coverage-report` | Demonstrability NFR: each stage independently showable. |
 | F6 | End-to-end: `examples/pathway.edu` compiles + runs, `; b` prints the correct binary string | `make demo` compares against `examples/pathway.expected` | Primary success metric. |

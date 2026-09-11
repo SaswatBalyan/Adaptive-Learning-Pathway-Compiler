@@ -6,7 +6,7 @@
 ---
 
 ## 1. Overview & Vision
-Build the **Adaptive Learning Pathway Compiler (ALPC)**, a simplified Domain-Specific Language (DSL) compiler for **"Path-Lang"** — a language educators use to describe student profiles and adaptive branching logic. ALPC translates Path-Lang source into **LLVM Intermediate Representation (IR)**, simulating how a student's performance state evolves as they move through a learning pathway. The project is scoped to fit the **30-hour Compiler Design Lab (BCSE307P)** requirement and is designed to walk through the full compiler pipeline — lexing, parsing, AST construction with RTTI, and IR code generation — using a concrete, demonstrable educational scenario rather than a generic toy language.
+Build the **Adaptive Learning Pathway Compiler (ALPC)**, a simplified Domain-Specific Language (DSL) compiler for **"Path-Lang"** — a language educators use to describe student profiles and adaptive branching logic. ALPC translates Path-Lang source into **LLVM Intermediate Representation (IR)**, simulating how a student's performance state evolves as they move through a learning pathway. The project is scoped to fit the **30-hour compiler design lab** requirement and is designed to walk through the full compiler pipeline — lexing, parsing, AST construction with RTTI, and IR code generation — using a concrete, demonstrable educational scenario rather than a generic toy language.
 
 ---
 
@@ -28,17 +28,17 @@ The Compiler Design Lab curriculum requires students to build a working lexer �
 ## 4. Target Users
 | User | Role |
 | ----- | ----- |
-| **Lab Student (Implementer)** | Builds and demonstrates the compiler to satisfy the BCSE307P lab requirements. |
-| **Lab Evaluator / Faculty** | Assesses whether each experiment (Flex, Bison, RTTI, IR/Assembler) is correctly implemented and demonstrated. |
+| **Lab Student (Implementer)** | Builds and demonstrates the compiler to satisfy the compiler requirements. |
+| **Lab Evaluator / Faculty** | Assesses whether each phase (Flex, Bison, RTTI, IR/Assembler) is correctly implemented and demonstrated. |
 | **Educator (DSL End User, conceptual)** | The persona Path-Lang is written for — defines student profiles and adaptive rules in a readable, domain-specific syntax. |
 ---
 
 ## 5. Architecture
-The architecture diagram illustrates the complete ALPC compiler pipeline, organized into three major stages that map directly onto the BCSE307P lab experiments:
+The architecture diagram illustrates the complete ALPC compiler pipeline, organized into three major stages that map directly onto the compiler phases:
 
-1. **Front End (Exp 7)** — The Lexer (`scanner.l` ) tokenizes `pathway.edu`  source files, producing tokens such as `SET` , `IF` , `GOTO` , `OUTCOME` , identifiers, numeric literals, comparison operators, and the `; b`  binary-output terminator. The Parser (`parser.y` ) consumes the token stream and enforces the Context-Free Grammar, including the Backward Design Check that rejects pathways referencing an outcome before it is declared.
-2. **AST & RTTI (Exp 8)** — The AST Builder (`ast.h`  / `ast.cpp` ) constructs an Abstract Syntax Tree with node types `ProfileSet` , `CondBranch` , and `OutcomeTrigger` . LLVM-style RTTI (`classof` , `isa<>` , `dyn_cast<>` ) enables safe traversal and node identification during code generation. An AST dump can be printed for demonstration purposes.
-3. **Back End (Exp 9 & 10)** — Codegen (`codegen.cpp` ) walks the AST and emits LLVM IR implementing the Fusion Function (e.g., `skill + 10` ) and branching logic via basic blocks. The resulting `pathway.ll`  file encodes the Student State and Alignment Score. When a statement ends with `; b` , the generated executable prints the final score in binary (e.g., `15`  → `1111` ).
+1. **Front End** — The Lexer (`scanner.l` ) tokenizes `pathway.edu`  source files, producing tokens such as `SET` , `IF` , `GOTO` , `OUTCOME` , identifiers, numeric literals, comparison operators, and the `; b`  binary-output terminator. The Parser (`parser.y` ) consumes the token stream and enforces the Context-Free Grammar, including the Backward Design Check that rejects pathways referencing an outcome before it is declared.
+2. **AST & RTTI** — The AST Builder (`ast.h`  / `ast.cpp` ) constructs an Abstract Syntax Tree with node types `ProfileSet` , `CondBranch` , and `OutcomeTrigger` . LLVM-style RTTI (`classof` , `isa<>` , `dyn_cast<>` ) enables safe traversal and node identification during code generation. An AST dump can be printed for demonstration purposes.
+3. **Back End** — Codegen (`codegen.cpp` ) walks the AST and emits LLVM IR implementing the Fusion Function (e.g., `skill + 10` ) and branching logic via basic blocks. The resulting `pathway.ll`  file encodes the Student State and Alignment Score. When a statement ends with `; b` , the generated executable prints the final score in binary (e.g., `15`  → `1111` ).
 ---
 
 ## 6. Core Requirements
@@ -59,7 +59,7 @@ The architecture diagram illustrates the complete ALPC compiler pipeline, organi
 | Requirement | Description |
 | ----- | ----- |
 | **Scope** | Implementation must be completable within the 30-hour lab time budget |
-| **Curriculum Fit** | Each phase must map cleanly onto a specific Indicative Experiment (Exp. 7–10) in BCSE307P |
+| **Curriculum Fit** | Each phase maps to a specific compiler phase (lexing, parsing, AST/RTTI, codegen) |
 | **Toolchain** | Must build with standard Flex, Bison, and the LLVM C++ API/toolchain available in the lab environment |
 | **Correctness** | Grammar must reject pathways that violate Backward Design ordering (activity before outcome) |
 | **Demonstrability** | Every stage (tokens, parse tree, AST, IR, final binary output) must be independently showable to an evaluator, not just the final result |
@@ -120,12 +120,12 @@ The architecture diagram illustrates the complete ALPC compiler pipeline, organi
 | `codegen.cpp`  | AST → LLVM IR lowering, Fusion Function logic |
 | `pathway.edu`  | Sample Path-Lang source file for demonstration |
 ### 8.3 Curriculum Mapping
-| Phase | Lab Experiment | Implementation Detail |
+| Phase | Implementation Detail |
 | ----- | ----- | ----- |
-| Lexical Analysis | Exp 7: Intro to Flex | Tokens for `OUTCOME`, `GOTO`, and the `; b` binary terminator |
-| Syntax Analysis | Exp 7: Intro to Bison | CFG enforcing Backward Design (outcomes before activities) |
-| AST & RTTI | Exp 8: LLVM-style RTTI | AST nodes for curriculum stages, traversed via RTTI |
-| Code Generation | Exp 9 & 10: IR & Assembler | AST → LLVM IR modeling the Fusion Function; binary output logic |
+| Lexical Analysis | Tokens for `OUTCOME`, `GOTO`, and the `; b` binary terminator |
+| Syntax Analysis | CFG enforcing Backward Design (outcomes before activities) |
+| AST | AST & RTTI | AST/RTTI | AST nodes for curriculum stages, traversed via RTTI | RTTI | AST nodes for curriculum stages, traversed via RTTI |
+| Code Generation | AST → LLVM IR modeling the Fusion Function; binary output logic |
 ### 8.4 Deployment / Demo Strategy
 No runtime service — this is a lab artifact. The end-to-end compilation workflow diagram shows how `pathway.edu` is compiled and run in one pass, with each stage emitting an inspectable demo artifact:
 
@@ -153,7 +153,7 @@ Invalid pathways (Backward Design violations or syntax errors) are rejected with
 
 # ALPC 30-Hour Implementation Plan
 ## Executive Summary
-This document provides a detailed 30-hour implementation plan for the Adaptive Learning Pathway Compiler (ALPC), mapping each development phase to the BCSE307P lab experiments. The plan includes current-state and target-state architecture analysis, identifies data and logic gaps, and provides a time-boxed schedule for completing all deliverables.
+This document provides a detailed 30-hour implementation plan for the Adaptive Learning Pathway Compiler (ALPC), mapping each development phase to the compiler phases. The plan includes current-state and target-state architecture analysis, identifies data and logic gaps, and provides a time-boxed schedule for completing all deliverables.
 
 ---
 
@@ -186,9 +186,9 @@ Output: (none)
 ### 2.1 Target State
 A fully functional compiler pipeline as depicted in the architecture diagram, consisting of:
 
-- **Front End (Exp 7)**: Lexer (`scanner.l` ) and Parser (`parser.y` ) with Backward Design enforcement
-- **Middle Layer (Exp 8)**: AST Builder (`ast.h` /`ast.cpp` ) with LLVM-style RTTI
-- **Back End (Exp 9 & 10)**: Codegen (`codegen.cpp` ) emitting LLVM IR with binary output support
+- **Front End**: Lexer (`scanner.l` ) and Parser (`parser.y` ) with Backward Design enforcement
+- **Middle Layer**: AST Builder (`ast.h` /`ast.cpp` ) with LLVM-style RTTI
+- **Back End**: Codegen (`codegen.cpp` ) emitting LLVM IR with binary output support
 ### 2.2 Target Data Flow
 As shown in the end-to-end compilation workflow diagram:
 
@@ -198,16 +198,16 @@ pathway.edu → Lexer → Parser → Backward Design Check → AST Builder → R
            [tokens]  [parse tree]   [error/valid]     [AST dump]                      [IR listing]  [console: 1111]
 ```
 ### 2.3 Target Components
-| Component | Deliverable | Lab Experiment | Demo Artifact |
+| Component | Deliverable | Demo Artifact |
 | ----- | ----- | ----- | ----- |
-| `scanner.l`  | Flex lexer recognizing all Path-Lang tokens | Exp 7 | Token stream |
-| `parser.y`  | Bison grammar with Backward Design check | Exp 7 | Parse tree / trace |
-| `ast.h` / `ast.cpp`  | AST nodes: `ProfileSet`, `CondBranch`, `OutcomeTrigger`  | Exp 8 | AST dump / printed tree |
-| RTTI module | `classof`, `isa<>`, `dyn_cast<>` pattern | Exp 8 | Safe traversal demo |
-| `codegen.cpp`  | Fusion Function logic, basic blocks, `br` instructions | Exp 9 & 10 | `pathway.ll` IR listing |
-| Binary output | `; b` terminator triggers binary conversion | Exp 10 | Console prints `15 = 1111`  |
-| `pathway.edu`  | Sample Path-Lang source file | All | End-to-end input |
-| `Makefile`  | Build automation | All | One-command build |
+| `scanner.l`  | Flex lexer recognizing all Path-Lang tokens | Token stream |
+| `parser.y`  | Bison grammar with Backward Design check | Parse tree / trace |
+| `ast.h` / `ast.cpp`  | AST nodes: `ProfileSet`, `CondBranch`, `OutcomeTrigger`  | AST dump / printed tree |
+| RTTI module | `classof`, `isa<>`, `dyn_cast<>` pattern | Safe traversal demo |
+| `codegen.cpp`  | Fusion Function logic, basic blocks, `br` instructions | `pathway.ll` IR listing |
+| Binary output | `; b` terminator triggers binary conversion | Console prints `15 = 1111`  |
+| `pathway.edu`  | Sample Path-Lang source file | End-to-end input |
+| `Makefile`  | Build automation | One-command build |
 ---
 
 ## 3. Current Data & Logic Gaps
@@ -304,7 +304,7 @@ define void @print_binary(i32 %val) {
 | 1–2 | Set up project structure, Makefile, verify Flex/Bison/LLVM install | `Makefile`, directory layout | `make` runs without error |
 | 3–4 | Write `scanner.l` with all token rules including `; b`  | `scanner.l`  | Flex compiles without warnings |
 | 5–6 | Test lexer standalone with sample input; produce token stream dump | Token stream artifact | All tokens recognized correctly |
-**Milestone**: Lexer complete, Exp 7 (Flex) demonstrable.
+**Milestone**: Lexer complete, Flex demonstrable.
 
 ---
 
@@ -314,7 +314,7 @@ define void @print_binary(i32 %val) {
 | 7–8 | Write `parser.y` grammar productions for all statement types | `parser.y`  | Bison compiles without conflicts |
 | 9–10 | Add semantic actions to build parse tree; add outcome registry | Parse tree output | Tree printed for valid input |
 | 11–12 | Implement Backward Design check; test rejection of invalid ordering | Error message on violation | Invalid pathway rejected with clear message |
-**Milestone**: Parser complete, Exp 7 (Bison) demonstrable.
+**Milestone**: Parser complete, Bison demonstrable.
 
 ---
 
@@ -324,7 +324,7 @@ define void @print_binary(i32 %val) {
 | 13–14 | Define `ASTNode` base class and `NodeKind` enum in `ast.h`  | `ast.h`  | Compiles cleanly |
 | 15–16 | Implement `ProfileSet`, `CondBranch`, `OutcomeTrigger` with RTTI | `ast.cpp`  | `classof`/`isa` tests pass |
 | 17–18 | Modify parser actions to construct AST; implement AST dump utility | AST dump artifact | Printed tree matches input structure |
-**Milestone**: AST/RTTI complete, Exp 8 demonstrable.
+**Milestone**: AST/RTTI complete, RTTI demonstrable.
 
 ---
 
@@ -335,7 +335,7 @@ define void @print_binary(i32 %val) {
 | 21–22 | Implement codegen for `ProfileSet` (alloca, store) | IR for assignments | `opt -verify` passes |
 | 23–24 | Implement codegen for `CondBranch` (icmp, br, basic blocks) | IR for conditionals | Branches visible in `.ll`  |
 | 25–26 | Implement codegen for `OutcomeTrigger`; add `@print_binary` function | IR for outcome + binary | Score computed correctly |
-**Milestone**: Codegen complete, Exp 9 demonstrable.
+**Milestone**: Codegen complete, IR demonstrable.
 
 ---
 
@@ -345,7 +345,7 @@ define void @print_binary(i32 %val) {
 | 27–28 | Write final `pathway.edu` sample; end-to-end compile and run | `pathway.edu`, executable | Binary output printed (e.g., `1111`) |
 | 29 | Prepare demo script: show each artifact (tokens, parse tree, AST dump, `.ll`, binary) | Demo walkthrough notes | All 5 artifacts shown in sequence |
 | 30 | Buffer for fixes, documentation, final cleanup | Polished deliverables | Ready for evaluator presentation |
-**Milestone**: Full pipeline demonstrable, Exp 10 complete.
+**Milestone**: Full pipeline demonstrable, binary output complete.
 
 ---
 
@@ -359,14 +359,14 @@ define void @print_binary(i32 %val) {
 ---
 
 ## 7. Deliverables Checklist
-| # | Artifact | File(s) | Lab Experiment |
+| # | Artifact | File(s) |
 | ----- | ----- | ----- | ----- |
-| 1 | Lexer | `scanner.l`  | Exp 7 |
-| 2 | Parser | `parser.y`  | Exp 7 |
-| 3 | AST + RTTI | `ast.h`, `ast.cpp`  | Exp 8 |
-| 4 | Codegen | `codegen.cpp`  | Exp 9 & 10 |
-| 5 | Sample source | `pathway.edu`  | All |
-| 6 | Build system | `Makefile`  | All |
+| 1 | Lexer | `scanner.l`  |
+| 2 | Parser | `parser.y`  |
+| 3 | AST + RTTI | `ast.h`, `ast.cpp`  |
+| 4 | Codegen | `codegen.cpp`  |
+| 5 | Sample source | `pathway.edu`  |
+| 6 | Build system | `Makefile`  |
 | 7 | Demo artifacts | Token stream, parse tree, AST dump, `pathway.ll`, binary output | Presentation |
 ---
 

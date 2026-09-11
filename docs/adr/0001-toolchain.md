@@ -6,7 +6,7 @@ Status: accepted
 ## Context
 
 The dev machine is Windows 11 with only an old MinGW GCC 6.3.0 and no Flex, Bison,
-LLVM, or Make. The BCSE307P lab environment is a standard Linux toolchain. The PRD
+LLVM, or Make. A standard Linux toolchain is expected. The PRD
 requires Flex + Bison + the LLVM C++ API.
 
 ## Decision

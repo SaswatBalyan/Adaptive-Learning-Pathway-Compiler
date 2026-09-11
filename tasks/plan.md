@@ -30,21 +30,21 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
 
 - **CP-0 → done:** toolchain builds, `make` clean, SPEC.md approved-in-principle.
 - **CP-1 (after Phase 2):** `--dump-tokens` matches goldens for all valid fixtures;
-  bad-char fixture errors cleanly. Demo artifact = token stream. Maps to Exp 7 (Flex).
+  bad-char fixture errors cleanly. Demo artifact = token stream. Maps to Lexer (Flex).
 - **CP-2 (after Phase 3):** `bison` zero conflicts; valid fixtures parse; all 7 invalid
-  fixtures rejected with the exact `line N:` diagnostic; no crash. Exp 7 (Bison).
+  fixtures rejected with the exact `line N:` diagnostic; no crash. Maps to Parser (Bison).
 - **CP-3 (after Phase 4):** `--dump-ast` matches goldens; `tests/unit_ast` passes under
-  ASan/UBSan; node count == statement count. Exp 8.
+  ASan/UBSan; node count == statement count. Maps to AST/RTTI.
 - **CP-4 (after Phase 5):** `--emit-ir` output passes `llvm-as` + `opt -passes=verify`
-  for every valid fixture; branch fixtures show labeled blocks + conditional `br`. Exp 9.
+  for every valid fixture; branch fixtures show labeled blocks + conditional `br`. Maps to Codegen.
 - **CP-5 (after Phase 6):** `make demo` green; binary fixtures `0/1/15/255` correct;
-  full pipeline shown in one run. Exp 10.
+  full pipeline shown in one run. Maps to Binary Output.
 - **CP-6 (after Phase 7):** five-axis review findings resolved; `make check-full` green.
 - **CP-7 (after Phase 8):** `docs/DEMO.md` walkthrough runs end to end; README done.
 
 ## Task detail
 
-### Phase 2 — Lexer (Exp 7 / Flex)
+### Phase 2 — Lexer (Flex)
 
 - **T2.1 diagnostics module.** `src/diagnostics.{h,cpp}`: `report(line, msg)` →
   `stderr` as `line N: msg`; global error count; exit-code policy (1 = compile error).
@@ -63,7 +63,7 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
   + `.err`. `tests/run.sh` diffs `--dump-tokens`, checks invalid exit≠0 + stderr, `timeout 5`.
   *AC (CP-1):* `make check` green; bad-char exits 1 with `line N: unexpected character`.
 
-### Phase 3 — Parser + Backward Design (Exp 7 / Bison)
+### Phase 3 — Parser + Backward Design (Bison)
 
 - **T3.1 grammar productions.** `src/parser.y` per SPEC §2.3, `%define parse.error verbose`,
   `%locations`, tokens shared with the scanner (`%option bison-bridge`/`yylval` or a
@@ -82,7 +82,7 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
 - **T3.6 fixtures + goldens.** `.parsetrace` goldens for valid fixtures; 7 invalid
   fixtures total with `.err`. *AC (CP-2):* `make check` green; `bison` conflict-free.
 
-### Phase 4 — AST + RTTI (Exp 8)
+### Phase 4 — AST + RTTI
 
 - **T4.1 node hierarchy + RTTI.** `src/ast.h`: `enum NodeKind`, `ASTNode` base with
   protected kind ctor, `ProfileSet`/`Update`/`CondBranch`/`OutcomeTrigger` (or a single
@@ -99,7 +99,7 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
   positive+negative, visitor reaches every node. `make test-asan` builds it with
   `-fsanitize=address,undefined`. *AC (CP-3):* unit tests + fixtures pass under sanitizers.
 
-### Phase 5 — LLVM IR codegen (Exp 9)
+### Phase 5 — LLVM IR codegen
 
 - **T5.1 codegen skeleton.** `src/codegen.{h,cpp}`: `LLVMContext`, `Module`,
   `IRBuilder<>`; emit `define i32 @main()` with an entry block; `Module::print` to
@@ -119,7 +119,7 @@ Driver/CLI (`main.cpp`, `driver.cpp`) grows one mode per phase:
   `run.sh` (contains `icmp`, `br i1`, block labels; `opt -passes=verify` exit 0;
   `lli` numeric output). *AC (CP-4):* all valid fixtures verify + run.
 
-### Phase 6 — Binary output + end-to-end (Exp 10)
+### Phase 6 — Binary output + end-to-end
 
 - **T6.1 `@print_binary` in IR.** IRBuilder-generated bit loop (SPEC §2.5): handle 0,
   strip leading zeros, `@putchar`, trailing newline. *AC:* unit values 0→`0`, 1→`1`,

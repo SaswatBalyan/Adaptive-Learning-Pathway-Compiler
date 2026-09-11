@@ -291,7 +291,7 @@
 
 <header>
   <div class="wrap hero">
-    <span class="eyebrow reveal">BCSE307P · Compiler Design Lab · Experiments 7–10</span>
+    <span class="eyebrow reveal">Compiler Design · Lexer · Parser · AST/RTTI · Codegen</span>
     <h1 class="reveal d1">Adaptive Learning<br>Pathway <span class="accent">Compiler</span></h1>
     <p class="lead reveal d2">
       A Flex&nbsp;+&nbsp;Bison&nbsp;+&nbsp;LLVM compiler for <strong>Path-Lang</strong>, a small language
@@ -327,35 +327,35 @@
           <rect class="node-box" x="168" y="40" width="118" height="44" rx="2"></rect>
           <text class="node-name" x="227" y="58" text-anchor="middle">Lexer</text>
           <text class="node-sub"  x="227" y="72" text-anchor="middle">token stream</text>
-          <text class="node-exp"  x="227" y="102" text-anchor="middle">FLEX · EXP 7</text>
+          <text class="node-exp"  x="227" y="102" text-anchor="middle">FLEX</text>
         </g>
         <!-- parser -->
         <g>
           <rect class="node-box" x="316" y="40" width="118" height="44" rx="2"></rect>
           <text class="node-name" x="375" y="58" text-anchor="middle">Parser</text>
           <text class="node-sub"  x="375" y="72" text-anchor="middle">grammar + checks</text>
-          <text class="node-exp"  x="375" y="102" text-anchor="middle">BISON · EXP 7</text>
+          <text class="node-exp"  x="375" y="102" text-anchor="middle">BISON</text>
         </g>
         <!-- ast -->
         <g>
           <rect class="node-box" x="464" y="40" width="118" height="44" rx="2"></rect>
           <text class="node-name" x="523" y="58" text-anchor="middle">AST · RTTI</text>
           <text class="node-sub"  x="523" y="72" text-anchor="middle">typed tree</text>
-          <text class="node-exp"  x="523" y="102" text-anchor="middle">EXP 8</text>
+          <text class="node-exp"  x="523" y="102" text-anchor="middle">AST/RTTI</text>
         </g>
         <!-- codegen -->
         <g>
           <rect class="node-box" x="612" y="40" width="118" height="44" rx="2"></rect>
           <text class="node-name" x="671" y="58" text-anchor="middle">Codegen</text>
           <text class="node-sub"  x="671" y="72" text-anchor="middle">pathway.ll</text>
-          <text class="node-exp"  x="671" y="102" text-anchor="middle">LLVM · EXP 9</text>
+          <text class="node-exp"  x="671" y="102" text-anchor="middle">LLVM IR</text>
         </g>
         <!-- run -->
         <g>
           <rect class="node-box io" x="760" y="40" width="112" height="44" rx="2"></rect>
           <text class="node-name" x="816" y="58" text-anchor="middle">Run</text>
           <text class="payoff"    x="816" y="75" text-anchor="middle">1111</text>
-          <text class="node-exp"  x="816" y="102" text-anchor="middle">EXP 10</text>
+          <text class="node-exp"  x="816" y="102" text-anchor="middle">Run</text>
         </g>
       </svg>
     </div>
@@ -430,7 +430,7 @@
         <div class="stage">
           <div class="idx">01</div>
           <div>
-            <div class="head"><h3>Lexical analysis</h3><span class="exp">Flex · Exp 7</span></div>
+            <div class="head"><h3>Lexical analysis</h3><span class="exp">Flex</span></div>
             <p class="what">
               <code>scanner.l</code> turns the source into tokens: the keywords, identifiers,
               numbers, the comparators, and the custom <code>; b</code> binary-output terminator
@@ -461,7 +461,7 @@ EOF</div>
         <div class="stage">
           <div class="idx">02</div>
           <div>
-            <div class="head"><h3>Syntax analysis &amp; Backward Design</h3><span class="exp">Bison · Exp 7</span></div>
+            <div class="head"><h3>Syntax analysis &amp; Backward Design</h3><span class="exp">Bison</span></div>
             <p class="what">
               <code>parser.y</code> is an LALR(1) grammar with <strong>zero conflicts</strong>. Each
               trace line is a reduction. The Backward Design rule — a <code>GOTO</code> may only
@@ -491,7 +491,7 @@ branch performance &lt; 1000 -&gt; core
         <div class="stage">
           <div class="idx">03</div>
           <div>
-            <div class="head"><h3>AST construction &amp; RTTI</h3><span class="exp">Exp 8</span></div>
+            <div class="head"><h3>AST construction &amp; RTTI</h3><span class="exp">AST/RTTI</span></div>
             <p class="what">
               Three node kinds — <code>ProfileSet</code>, <code>CondBranch</code>,
               <code>Outcome</code>. The dump walks the tree through <strong>LLVM-style RTTI</strong>
@@ -522,7 +522,7 @@ branch performance &lt; 1000 -&gt; core
         <div class="stage">
           <div class="idx">04</div>
           <div>
-            <div class="head"><h3>LLVM IR code generation</h3><span class="exp">LLVM · Exp 9</span></div>
+            <div class="head"><h3>LLVM IR code generation</h3><span class="exp">LLVM IR</span></div>
             <p class="what">
               <code>codegen.cpp</code> emits one <code>alloca</code> per variable,
               <code>load</code>/<code>add</code>/<code>store</code> for the Fusion Function, and
@@ -559,7 +559,7 @@ branch performance &lt; 1000 -&gt; core
         <div class="stage">
           <div class="idx">05</div>
           <div>
-            <div class="head"><h3>Binary-output trigger &amp; run</h3><span class="exp">Exp 10</span></div>
+            <div class="head"><h3>Binary-output trigger &amp; run</h3><span class="exp">Run</span></div>
             <p class="what">
               Because a statement used <code>; b</code>, <code>prog_end</code> calls
               <code>@print_binary</code> — an in-IR bit loop over <code>@putchar</code>. Execute

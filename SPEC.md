@@ -12,11 +12,9 @@ and the 30-hour plan in `document-export-*.md`.
 Build `alpc`, a command-line compiler that translates a Path-Lang source file
 (`*.edu`) into LLVM IR and a runnable program, walking through — and independently
 demonstrating — every classic compiler phase: lexing (Flex), parsing (Bison),
-AST + RTTI, and LLVM IR code generation. Scoped to ≤30 hours and to BCSE307P
-experiments 7–10.
+AST + RTTI, and LLVM IR code generation. Scoped to ≤30 hours.
 
-**Users:** the lab student (implementer/demonstrator), the faculty evaluator (checks each
-experiment), and — conceptually — an educator who would write Path-Lang.
+**Users:** the implementer/demonstrator, the evaluator, and — conceptually — an educator who would write Path-Lang.
 
 **Not building:** a runtime service, a real adaptive-learning engine, optimization passes,
 a standard library, or any language feature beyond §3.
@@ -53,7 +51,7 @@ always-true "default path" to the terminal outcome. An outcome is declared once;
 a later `IF ... GOTO` only references it (re-declaring a name is an error, 2.4).
 The `; b` on the final statement selects binary output for the whole program.
 
-### 2.2 Lexical grammar (`scanner.l`, Exp 7 / Flex)
+### 2.2 Lexical grammar (`scanner.l`, Flex)
 
 | Token | Pattern | Notes |
 |---|---|---|
@@ -74,7 +72,7 @@ The `; b` on the final statement selects binary output for the whole program.
 
 `--dump-tokens` prints one `TYPE  lexeme  (line N)` per line, ending with `EOF`.
 
-### 2.3 Context-free grammar (`parser.y`, Exp 7 / Bison, LALR(1), zero conflicts)
+### 2.3 Context-free grammar (`parser.y`, Bison, LALR(1), zero conflicts)
 
 ```
 program     : stmt_list
@@ -167,10 +165,10 @@ Any violation ⇒ compilation fails after parsing (non-zero exit), no IR emitted
 | `make demo` | `./alpc examples/pathway.edu > pathway.ll && lli pathway.ll` vs `.expected` |
 | `make test-asan` | build `alpc` + `tests/unit_ast` with `-fsanitize=address,undefined`, run fixtures |
 | `make clean` | remove build artifacts + generated Flex/Bison sources |
-| `./alpc --dump-tokens FILE` | Exp 7 artifact — token stream |
-| `./alpc --parse-trace FILE` | Exp 7 artifact — parse/reduction trace |
-| `./alpc --dump-ast FILE` | Exp 8 artifact — indented AST, RTTI-driven |
-| `./alpc --emit-ir FILE` (default) | Exp 9 artifact — LLVM IR to stdout |
+| `./alpc --dump-tokens FILE` | Token stream |
+| `./alpc --parse-trace FILE` | Parse/reduction trace |
+| `./alpc --dump-ast FILE` | Indented AST, RTTI-driven |
+| `./alpc --emit-ir FILE` (default) | LLVM IR to stdout |
 | `./alpc --help` | usage |
 
 Exit codes: `0` ok, `1` lexical/syntax/semantic error, `2` bad CLI usage, `3` internal error.
@@ -264,4 +262,4 @@ Build order (each phase depends on the previous): `diagnostics` → `scanner` �
 - Silence F1 with `#pragma`/`-Wno-*`, or make invalid IR "pass" by skipping `opt -verify`.
 - Skip, delete, or weaken a fixture to land a change (`/constraints guard` will catch it).
 - Leave codegen paths stubbed such that `--emit-ir` produces IR that fails the verifier.
-- Use `dynamic_cast` / enable `-frtti` for AST type identification (defeats the Exp 8 point).
+- Use `dynamic_cast` / enable `-frtti` for AST type identification (defeats the RTTI point).

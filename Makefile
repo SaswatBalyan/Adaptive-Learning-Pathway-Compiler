@@ -27,6 +27,7 @@ BISONFLAGS := -Wcounterexamples -Werror=conflicts-sr -Werror=conflicts-rr
 
 LLVM_CONFIG    := llvm-config
 LLVM_CXXFLAGS  := $(shell $(LLVM_CONFIG) --cxxflags)
+LLVM_CXXFLAGS_SYS := $(subst -I,-isystem,$(LLVM_CXXFLAGS))
 LLVM_LDFLAGS   := $(shell $(LLVM_CONFIG) --ldflags)
 LLVM_LIBS      := $(shell $(LLVM_CONFIG) --libs core) $(shell $(LLVM_CONFIG) --system-libs)
 
@@ -53,7 +54,7 @@ $(OBJ)/%.o: $(SRC)/%.cpp $(HAND_HDRS) $(OBJ)/parser.tab.h | $(OBJ)
 
 # codegen.cpp pulls in LLVM headers -> needs llvm-config cxxflags.
 $(OBJ)/codegen.o: $(SRC)/codegen.cpp $(SRC)/codegen.h $(SRC)/ast.h | $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS_SYS) -c -o $@ $<
 
 $(OBJ)/parser.tab.c $(OBJ)/parser.tab.h &: $(SRC)/parser.y | $(OBJ)
 	$(BISON) $(BISONFLAGS) -d -o $(OBJ)/parser.tab.c $<
@@ -95,7 +96,7 @@ test-asan: $(OBJ)/parser.tab.c $(OBJ)/parser.tab.h $(OBJ)/lex.yy.c | $(OBJ)
 	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/tok.o    $(SRC)/tokens.cpp
 	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/sema.o   $(SRC)/semantics.cpp
 	$(CXX) $(CXXFLAGS) $(SAN) -c -o $(SANOBJ)/ast.o    $(SRC)/ast.cpp
-	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS) $(SAN) -c -o $(SANOBJ)/codegen.o $(SRC)/codegen.cpp
+	$(CXX) $(CXXFLAGS) $(LLVM_CXXFLAGS_SYS) $(SAN) -c -o $(SANOBJ)/codegen.o $(SRC)/codegen.cpp
 	$(CXX) $(GENFLAGS) $(SAN) -c -o $(SANOBJ)/parser.o $(OBJ)/parser.tab.c
 	$(CXX) $(GENFLAGS) $(SAN) -c -o $(SANOBJ)/lex.o    $(OBJ)/lex.yy.c
 	$(CXX) $(CXXFLAGS) $(SAN) -o $(SANOBJ)/alpc $(SANOBJ)/main.o $(SANOBJ)/diag.o \
