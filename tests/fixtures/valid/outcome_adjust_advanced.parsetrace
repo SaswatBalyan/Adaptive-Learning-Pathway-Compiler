@@ -1,0 +1,10 @@
+outcome remedial -= 5
+outcome core
+outcome advanced += 10
+set performance = 90
+set state = 0
+set state += 15
+branch performance < 70 -> remedial
+branch performance > 85 -> advanced
+branch performance < 1000 -> core
+binary-output

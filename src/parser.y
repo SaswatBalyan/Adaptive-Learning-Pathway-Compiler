@@ -31,7 +31,7 @@ extern alpc::Program *g_program;  // set by the driver before yyparse()
 %token <ival> NUMBER
 %token LT GT EQ ASSIGN ADD_ASSIGN SUB_ASSIGN SEMI SEMI_B
 
-%type <ival> set_op rel
+%type <ival> set_op rel outcome_op
 
 /* IDENT carries a strdup'd string; free it if error recovery discards the token
  * (Bison manual, "Destructor Decl"). Rule actions free the ones they consume;
@@ -62,6 +62,16 @@ outcome_stmt
       { g_program->stmts.push_back(
             std::make_unique<alpc::Outcome>(@2.first_line, $2));
         free($2); }
+  | OUTCOME IDENT outcome_op NUMBER term
+      { g_program->stmts.push_back(
+            std::make_unique<alpc::Outcome>(@2.first_line, $2, $3 * $4));
+        free($2); }
+  ;
+
+/* Outcome adjustment: sign of the amount applied to `state` on arrival. */
+outcome_op
+  : ADD_ASSIGN  { $$ = 1; }
+  | SUB_ASSIGN  { $$ = -1; }
   ;
 
 set_stmt

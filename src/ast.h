@@ -85,16 +85,19 @@ class CondBranch final : public ASTNode {
   const std::string target;
 };
 
-// OUTCOME <name>
+// OUTCOME <name> [ += n | -= n ]
+// `adjust` is the signed amount applied to `state` when a GOTO reaches this
+// outcome (SPEC 2.5); 0 for a plain declaration.
 class Outcome final : public ASTNode {
  public:
-  Outcome(int line, std::string name)
-      : ASTNode(NK_Outcome, line), name(std::move(name)) {}
+  Outcome(int line, std::string name, int adjust = 0)
+      : ASTNode(NK_Outcome, line), name(std::move(name)), adjust(adjust) {}
 
   static bool classof(const ASTNode *n) { return n->kind() == NK_Outcome; }
   void print(std::ostream &os) const override;
 
   const std::string name;
+  const int adjust;
 };
 
 // LLVM-style free functions. T must expose `static bool classof(const ASTNode*)`.

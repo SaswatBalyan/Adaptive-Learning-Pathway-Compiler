@@ -1,0 +1,13 @@
+# Outcome adjustments: the pathway taken changes the Alignment Score.
+OUTCOME remedial -= 5;
+OUTCOME core;
+OUTCOME advanced += 10;
+
+SET performance = 90;
+
+SET state = 0;
+SET state += 15;
+
+IF performance < 70 GOTO remedial;
+IF performance > 85 GOTO advanced;
+IF performance < 1000 GOTO core; b

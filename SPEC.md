@@ -82,6 +82,8 @@ stmt        : outcome_stmt
             | set_stmt
             | branch_stmt
 outcome_stmt: OUTCOME IDENT term
+            | OUTCOME IDENT outcome_op NUMBER term
+outcome_op  : ADD_ASSIGN | SUB_ASSIGN
 set_stmt    : SET IDENT set_op NUMBER term
 set_op      : ASSIGN | ADD_ASSIGN | SUB_ASSIGN
 branch_stmt : IF IDENT rel NUMBER GOTO IDENT term
@@ -94,9 +96,9 @@ skip to the next terminator, continue; exit non-zero. No crash (Floor F4).
 
 `--parse-trace` prints each reduction (`reduce: set_stmt -> SET IDENT set_op NUMBER term`).
 
-### 2.4 Static semantics (semantic actions in `parser.y`)
+### 2.4 Static semantics (`semantics.cpp`, `check_program()`)
 
-Checked as the parse proceeds, so the source order is what matters:
+Checked in one source-order pass over the AST after parsing, so the source order is what matters:
 
 1. **Backward Design** — the `IDENT` after `GOTO` must already have appeared in an
    `outcome_stmt`. Otherwise:
@@ -110,6 +112,9 @@ Checked as the parse proceeds, so the source order is what matters:
    `SET x = n`: `line N: 'X' is updated before it is set`
 5. Reserved name **[D]** — `state` is the distinguished Student-State variable (§2.5); it
    may be `SET`/updated but not used as an outcome name.
+6. **Adjust-before-set** — an `IF ... GOTO L` whose outcome `L` carries an adjustment
+   (§2.5) requires an earlier `SET state = n`:
+   `line N: outcome 'L' adjusts 'state', but 'state' is not set before this branch`
 
 Any violation ⇒ compilation fails after parsing (non-zero exit), no IR emitted.
 
@@ -125,6 +130,12 @@ Any violation ⇒ compilation fails after parsing (non-zero exit), no IR emitted
 - `IF v REL n GOTO L` — evaluate `v REL n`; if true, transfer control to outcome `L`.
 - Reaching any `OUTCOME` (by GOTO or fall-through) **ends the pathway**. The
   Alignment Score is the value of `state` at that point.
+- **Outcome adjustment:** `OUTCOME L += n;` / `OUTCOME L -= n;` declares `L` with a
+  pathway-specific adjustment. When an `IF ... GOTO L` is taken, `state ← state ± n`
+  before the pathway ends, so the branch taken changes the score. `OUTCOME L;` means
+  no adjustment. Lowered as a `load`/`add`|`sub`/`store` inside `outcome.L`.
+  Example: `tests/fixtures/valid/outcome_adjust_*.edu` — base score 15;
+  remedial (`-= 5`) → `1010`, core → `1111`, advanced (`+= 10`) → `11001`.
 - If **any** statement in the program used the `; b` terminator, the program prints the
   final Alignment Score as a binary string (no leading zeros; `0` prints as `0`),
   followed by a newline. Otherwise it prints the score in decimal.

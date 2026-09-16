@@ -61,7 +61,9 @@ lli pathway.ll          # or: clang pathway.ll -o pathway && ./pathway
 ## The language
 
 `SET` a profile, run the **Fusion Function** over the Student State, branch on the
-profile, end at an **outcome**. Outcomes must be declared before any `IF … GOTO`
+profile, end at an **outcome**. An outcome can carry an adjustment
+(`OUTCOME advanced += 10;`) that is applied to the score when a branch reaches it, so the
+pathway taken changes the result. Outcomes must be declared before any `IF … GOTO`
 targets them (Backward Design). Full grammar and semantics: **`SPEC.md`**.
 
 ```
@@ -92,8 +94,8 @@ src/
 tests/
   run.sh              fixture runner
   unit_ast.cpp        RTTI / traversal assertions
-  fixtures/valid/     14 programs + .tokens/.parsetrace/.ast/.run/.irhas goldens
-  fixtures/invalid/   10 programs + .err (expected diagnostic)
+  fixtures/valid/     17 programs + .tokens/.parsetrace/.ast/.run/.irhas goldens
+  fixtures/invalid/   11 programs + .err (expected diagnostic)
 examples/pathway.edu  the demonstration program
 docs/
   DEMO.md            evaluator walkthrough (all five artifacts, one run)

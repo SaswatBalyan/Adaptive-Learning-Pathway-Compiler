@@ -1,0 +1,5 @@
+outcome.advanced:
+add i32 %state.cur
+, 10
+sub i32 %state.cur, 5
+br i1 %cond
