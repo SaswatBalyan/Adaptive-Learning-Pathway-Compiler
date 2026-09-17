@@ -138,12 +138,23 @@ std::string emit_ir(const Program &p, const std::string &module_name, bool &ok) 
   }
 
   // --- one basic block per declared OUTCOME; each ends the pathway ---
+  // An outcome with an adjustment applies it to `state` on arrival, so the
+  // chosen pathway changes the Alignment Score (SPEC 2.5).
   std::map<std::string, BasicBlock *> outcome_bb;
   for (const auto &s : p.stmts) {
     if (const auto *o = dyn_cast<Outcome>(s.get())) {
       BasicBlock *bb = BasicBlock::Create(ctx, "outcome." + o->name, main_fn);
       outcome_bb[o->name] = bb;
       b.SetInsertPoint(bb);
+      if (o->adjust != 0) {
+        llvm::AllocaInst *st = slots["state"];
+        Value *cur = b.CreateLoad(i32, st, "state.cur");
+        Value *next =
+            o->adjust > 0
+                ? b.CreateAdd(cur, b.getInt32(o->adjust), "outcome.adjust")
+                : b.CreateSub(cur, b.getInt32(-o->adjust), "outcome.adjust");
+        b.CreateStore(next, st);
+      }
       b.CreateBr(prog_end);
     }
   }

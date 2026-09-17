@@ -31,6 +31,7 @@ void CondBranch::print(std::ostream &os) const {
 
 void Outcome::print(std::ostream &os) const {
   os << "Outcome     line=" << line() << "  name=\"" << name << "\"";
+  if (adjust != 0) os << " adjust=" << (adjust > 0 ? "+" : "") << adjust;
 }
 
 void print_ast(std::ostream &os, const Program &p) {
@@ -52,7 +53,10 @@ void print_trace(std::ostream &os, const Program &p) {
       os << "branch " << b->var << " " << rel_op_str(b->rel) << " " << b->value
          << " -> " << b->target << "\n";
     } else if (const auto *o = dyn_cast<Outcome>(stmt.get())) {
-      os << "outcome " << o->name << "\n";
+      os << "outcome " << o->name;
+      if (o->adjust > 0) os << " += " << o->adjust;
+      if (o->adjust < 0) os << " -= " << -o->adjust;
+      os << "\n";
     }
   }
   if (p.binary_output) os << "binary-output\n";

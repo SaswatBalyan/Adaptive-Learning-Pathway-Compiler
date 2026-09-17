@@ -1,0 +1,10 @@
+Program binary_output=1
+  Outcome     line=2  name="remedial" adjust=-5
+  Outcome     line=3  name="core"
+  Outcome     line=4  name="advanced" adjust=+10
+  ProfileSet  line=6  name="performance" op="=" value=90
+  ProfileSet  line=8  name="state" op="=" value=0
+  ProfileSet  line=9  name="state" op="+=" value=15
+  CondBranch  line=11  var="performance" rel="<" value=70 target="remedial"
+  CondBranch  line=12  var="performance" rel=">" value=85 target="advanced"
+  CondBranch  line=13  var="performance" rel="<" value=1000 target="core"

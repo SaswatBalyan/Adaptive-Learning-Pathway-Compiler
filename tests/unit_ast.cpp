@@ -99,6 +99,18 @@ int main() {
   bad.stmts.push_back(std::make_unique<ProfileSet>(1, "x", OP_ASSIGN, 0));
   CHECK(check_program(bad) >= 1);  // 'x' used before set AND 'late' undeclared
 
+  // --- outcome adjustments: default 0, stored signed, state rule enforced ---
+  CHECK(cast<Outcome>(o.get())->adjust == 0);
+  Program adj;
+  adj.stmts.push_back(std::make_unique<Outcome>(1, "boost", 10));
+  adj.stmts.push_back(std::make_unique<ProfileSet>(2, "x", OP_ASSIGN, 1));
+  adj.stmts.push_back(std::make_unique<CondBranch>(3, "x", REL_EQ, 1, "boost"));
+  CHECK(cast<Outcome>(adj.stmts[0].get())->adjust == 10);
+  CHECK(check_program(adj) == 1);  // 'state' not set before the branch
+  adj.stmts.insert(adj.stmts.begin() + 1,
+                   std::make_unique<ProfileSet>(2, "state", OP_ASSIGN, 0));
+  CHECK(check_program(adj) == 0);
+
   std::printf("unit_ast: %d checks passed\n", checks);
   return 0;
 }
