@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@tailwindcss/postcss": "^4.3.3",
     "autoprefixer": "^10.6.1",
     "next": "^15.5.26",

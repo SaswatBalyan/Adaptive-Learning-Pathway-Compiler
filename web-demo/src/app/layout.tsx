@@ -1,14 +1,15 @@
-import type { Metadata } from 'next'
-import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import { Geist, JetBrains_Mono } from 'next/font/google'
+import './globals.css'
 
-const ibmPlexSans = IBM_Plex_Sans({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
   display: 'swap',
 })
 
-const ibmPlexMono = IBM_Plex_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-mono',
@@ -16,8 +17,17 @@ const ibmPlexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'ALPC — Interactive Console',
-  description: 'Adaptive Learning Pathway Compiler console: write Path-Lang source, select default scripts, and visualize compilation phases',
+  title: 'ALPC Studio — Compiler Workbench',
+  description: 'Adaptive Learning Pathway Compiler workbench: write Path-Lang source and inspect every real compilation stage — lexer tokens, parse trace, AST, LLVM IR, and JIT execution.',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
+    { media: '(prefers-color-scheme: dark)', color: '#020617' },
+  ],
 }
 
 export default function RootLayout({
@@ -28,18 +38,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
+      className={`${geist.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Applies the persisted theme before first paint so there is no
+            flash of the wrong theme while React hydrates and re-reads
+            localStorage (see the read/write effects in ConsoleClient). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('alpc-theme');if(t==='dark'||t==='light'){document.documentElement.dataset.theme=t;}}catch(e){}})();",
+          }}
+        />
       </head>
-      <body
-        className="antialiased"
-        style={{ background: 'var(--canvas)', color: 'var(--text)' }}
-        suppressHydrationWarning
-      >
+      <body className="antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>

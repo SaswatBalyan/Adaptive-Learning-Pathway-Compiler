@@ -33,7 +33,11 @@ export function PipelineStage({ index, id, result }: PipelineStageProps) {
 
   return (
     <div className={`stage-card stage-card-${status}`} style={{ animationDelay: `${index * 90}ms` }}>
-      <button className="stage-card__head" onClick={() => setOpen((o) => !o)}>
+      <button
+        className="stage-card__head"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
         <span className="stage-card__idx">{String(index + 1).padStart(2, '0')}</span>
         <span className="stage-card__title-wrap">
           <span className="stage-card__title">{meta.title}</span>
@@ -78,8 +82,7 @@ export function PipelineStage({ index, id, result }: PipelineStageProps) {
                     </div>
                   ) : (
                     <p className="stage-card__note">
-                      Nothing was printed — this source never used <span className="chip">; b</span>. The Alignment
-                      Score is the process exit code below instead.
+                      Nothing was printed by this run. The Alignment Score is the process exit code below instead.
                     </p>
                   )}
                   {result.exitCode !== null && (

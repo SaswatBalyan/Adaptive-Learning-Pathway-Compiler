@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>ALPC Studio — Compiler Workbench</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            outline: "#707881",
+            "inverse-surface": "#283044",
+            "primary-container": "#007bb9",
+            "surface-variant": "#f1f5f9",
+            "on-surface": "#0f172a",
+            "outline-variant": "#e2e8f0",
+            "on-surface-variant": "#64748b",
+            "surface-container-highest": "#f8fafc",
+            "surface-bright": "#ffffff",
+            "on-tertiary-fixed": "#0b1c30",
+            tertiary: "#4d5d73",
+            error: "#ba1a1a",
+            "on-primary-container": "#fdfcff",
+            "secondary-fixed": "#059669",
+            "inverse-primary": "#93ccff",
+            background: "#f8fafc",
+            "surface-container-high": "#f1f5f9",
+            "surface-container": "#f8fafc",
+            "surface-tint": "#0284c7",
+            "inverse-on-surface": "#eef0ff",
+            "on-primary": "#ffffff",
+            secondary: "#059669",
+            "surface-dim": "#f1f5f9",
+            "error-container": "#ffdad6",
+            primary: "#0284c7",
+            surface: "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f8fafc"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.375rem",
+            xl: "0.5rem"
+          },
+          spacing: {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "space-xl": "1.25rem"
+          },
+          fontFamily: {
+            "body-sm": ["Geist", "sans-serif"],
+            "headline-sm": ["Geist", "sans-serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "headline-lg": ["Geist", "sans-serif"],
+            "code-lg": ["JetBrains Mono", "monospace"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "code-sm": ["JetBrains Mono", "monospace"]
+          },
+          fontSize: {
+            "body-sm": ["0.75rem", { lineHeight: "1rem", fontWeight: "400" }],
+            "headline-sm": ["0.875rem", { lineHeight: "1.25rem", fontWeight: "600" }],
+            "body-md": ["0.8125rem", { lineHeight: "1.25rem", fontWeight: "400" }],
+            "label-md": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.02em", fontWeight: "500" }],
+            "headline-lg": ["1.125rem", { lineHeight: "1.375rem", fontWeight: "600" }],
+            "code-lg": ["0.8125rem", { lineHeight: "1.35rem", fontWeight: "400" }],
+            "label-sm": ["0.6875rem", { lineHeight: "0.875rem", letterSpacing: "0.03em", fontWeight: "500" }],
+            "code-sm": ["0.75rem", { lineHeight: "1.1rem", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+    }
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 font-body-md text-slate-800 antialiased overflow-hidden select-none h-screen flex flex-col">
+<!-- Minimalist Top Navigation -->
+<header class="h-10 bg-white border-b border-slate-200 z-50 flex items-center justify-between px-3 shrink-0">
+<div class="flex items-center gap-2.5">
+<div class="flex items-center gap-1.5 font-label-md text-label-md text-sky-600 font-semibold tracking-tight">
+<span class="material-symbols-outlined text-sky-600 text-[18px]">terminal</span>
+<span>ALPC</span>
+<span class="text-slate-400 font-normal font-code-sm text-[11px]">Studio</span>
+</div>
+<div class="h-3.5 w-px bg-slate-200"></div>
+<div class="flex items-center gap-1 text-slate-500 font-code-sm text-[12px]">
+<span class="text-slate-400">pathways /</span>
+<span class="text-slate-700 font-medium bg-slate-100 px-1.5 py-0.5 rounded text-[11px] border border-slate-200">pathway.edu</span>
+</div>
+<span class="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-code-sm border border-slate-200 ml-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        LLVM 17 JIT
+      </span>
+</div>
+<!-- Quick Metrics & Actions -->
+<div class="flex items-center gap-2">
+<div class="hidden sm:flex items-center gap-1.5 font-code-sm text-[11px] text-slate-500 mr-1">
+<span class="text-slate-400">Parse</span>
+<span class="text-slate-700 font-medium">1.2ms</span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-400">Codegen</span>
+<span class="text-slate-700 font-medium">3.4ms</span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-400">Exit</span>
+<span class="text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200/60">25</span>
+</div>
+<button class="flex items-center gap-1 px-2.5 py-1 bg-sky-600 text-white rounded font-label-md text-[12px] font-medium hover:bg-sky-700 transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]">play_arrow</span>
+<span>Run</span>
+</button>
+<div class="flex items-center text-slate-400 border-l border-slate-200 pl-2 ml-1 gap-0.5">
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Toggle Layout"><span class="material-symbols-outlined text-[17px]">view_column</span></button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Settings"><span class="material-symbols-outlined text-[17px]">settings</span></button>
+</div>
+</div>
+</header>
+<!-- Workspace Shell -->
+<div class="flex flex-1 min-h-0 overflow-hidden">
+<!-- Slim Left Activity Sidebar -->
+<aside class="w-10 bg-white border-r border-slate-200 flex flex-col items-center py-2 justify-between shrink-0">
+<nav class="flex flex-col items-center gap-1 w-full">
+<a class="w-8 h-8 flex items-center justify-center rounded text-sky-600 bg-sky-50 font-medium" href="#" title="Workbench">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</a>
+<a class="w-8 h-8 flex items-center justify-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" href="#" title="AST">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+</a>
+<a class="w-8 h-8 flex items-center justify-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" href="#" title="Tokens">
+<span class="material-symbols-outlined text-[18px]">data_array</span>
+</a>
+<a class="w-8 h-8 flex items-center justify-center rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" href="#" title="Debugger">
+<span class="material-symbols-outlined text-[18px]">bug_report</span>
+</a>
+</nav>
+<div class="flex flex-col items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Help">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+</button>
+</div>
+</aside>
+<!-- Main Execution & Code Workspace -->
+<main class="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-hidden">
+<!-- Streamlined Pipeline Ribbon -->
+<div class="h-8 bg-white border-b border-slate-200 px-3 flex items-center justify-between shrink-0 text-slate-600">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Pipeline</span>
+<div class="h-3 w-px bg-slate-200 mx-1"></div>
+<div class="flex items-center gap-1 text-[11px] font-code-sm">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+<span class="material-symbols-outlined text-[12px]">check</span> Lex
+            </span>
+<span class="text-slate-300">→</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+<span class="material-symbols-outlined text-[12px]">check</span> AST
+            </span>
+<span class="text-slate-300">→</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+<span class="material-symbols-outlined text-[12px]">check</span> IR
+            </span>
+<span class="text-slate-300">→</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+<span class="material-symbols-outlined text-[12px]">check</span> Opt
+            </span>
+<span class="text-slate-300">→</span>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-medium">
+<span class="material-symbols-outlined text-[12px]">bolt</span> JIT Exec
+            </span>
+</div>
+</div>
+<div class="flex items-center gap-2 font-code-sm text-[11px]">
+<span class="text-slate-400">All passes passed</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</div>
+</div>
+<!-- Content Panels Grid -->
+<div class="flex-1 p-2 gap-2 grid grid-cols-12 min-h-0 overflow-hidden">
+<!-- LEFT: DSL Editor Panel (5 cols) -->
+<div class="col-span-5 bg-white border border-slate-200 rounded-lg flex flex-col min-h-0 shadow-sm overflow-hidden">
+<!-- Editor Subheader -->
+<div class="h-8 border-b border-slate-200 px-3 bg-slate-50/70 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-2">
+<span class="font-code-sm text-[12px] font-medium text-slate-800">pathway.edu</span>
+<span class="text-slate-400 font-code-sm text-[11px]">13 LOC</span>
+</div>
+<div class="flex items-center gap-1 text-slate-400">
+<button class="p-1 hover:text-slate-700 hover:bg-slate-200/50 rounded transition-colors" title="Copy code"><span class="material-symbols-outlined text-[14px]">content_copy</span></button>
+</div>
+</div>
+<!-- Editor Body -->
+<div class="flex-1 flex overflow-y-auto font-code-lg text-[13px] leading-relaxed p-2 select-text bg-white">
+<div class="w-7 shrink-0 text-right pr-2 text-slate-300 select-none font-code-sm text-[11px] pt-0.5 space-y-0.5">
+<div>01</div><div>02</div><div>03</div><div>04</div><div>05</div><div>06</div><div>07</div><div>08</div><div>09</div><div>10</div><div>11</div><div>12</div><div>13</div>
+</div>
+<div class="flex-1 pl-1 whitespace-pre overflow-x-auto text-slate-700 pt-0.5 space-y-0.5">
+<div class="text-slate-400 italic"># Pathway score adjustment rule</div>
+<div><span class="text-sky-700 font-semibold">OUTCOME</span> <span class="text-violet-600">remedial</span> <span class="text-slate-500">-=</span> <span class="text-amber-600 font-medium">5</span>;</div>
+<div><span class="text-sky-700 font-semibold">OUTCOME</span> <span class="text-violet-600">core</span>;</div>
+<div><span class="text-sky-700 font-semibold">OUTCOME</span> <span class="text-violet-600">advanced</span> <span class="text-slate-500">+=</span> <span class="text-amber-600 font-medium">10</span>;</div>
+<div class="text-transparent select-none">-</div>
+<div><span class="text-sky-700 font-semibold">SET</span> performance <span class="text-slate-500">=</span> <span class="text-amber-600 font-medium">90</span>;</div>
+<div><span class="text-sky-700 font-semibold">SET</span> state <span class="text-slate-500">=</span> <span class="text-amber-600 font-medium">0</span>;</div>
+<div class="text-transparent select-none">-</div>
+<div><span class="text-sky-700 font-semibold">SET</span> state <span class="text-slate-500">+=</span> <span class="text-amber-600 font-medium">15</span>;</div>
+<div class="text-transparent select-none">-</div>
+<div><span class="text-sky-700 font-semibold">IF</span> performance <span class="text-slate-500">&lt;</span> <span class="text-amber-600 font-medium">70</span> <span class="text-sky-700 font-semibold">GOTO</span> <span class="text-violet-600">remedial</span>;</div>
+<div class="bg-sky-50 -mx-1 px-1 rounded flex items-center border border-sky-100">
+<span><span class="text-sky-700 font-semibold">IF</span> performance <span class="text-slate-500">&gt;</span> <span class="text-amber-600 font-medium">85</span> <span class="text-sky-700 font-semibold">GOTO</span> <span class="text-violet-600 font-medium">advanced</span>;</span>
+<span class="w-1.5 h-3 bg-sky-500 animate-pulse ml-0.5 inline-block"></span>
+</div>
+<div><span class="text-sky-700 font-semibold">IF</span> performance <span class="text-slate-500">&lt;</span> <span class="text-amber-600 font-medium">1000</span> <span class="text-sky-700 font-semibold">GOTO</span> <span class="text-violet-600">core</span>;</div>
+</div>
+</div>
+<!-- Editor Footer Status -->
+<div class="h-6 border-t border-slate-200 bg-slate-50 px-3 flex items-center justify-between text-slate-500 font-code-sm text-[11px] shrink-0">
+<span class="text-emerald-600 font-medium">● Matched target: advanced</span>
+<span class="text-slate-400">LALR(1) clean</span>
+</div>
+</div>
+<!-- RIGHT: 2x2 Clean Quadrant Stages (7 cols) -->
+<div class="col-span-7 grid grid-cols-2 grid-rows-2 gap-2 min-h-0">
+<!-- TOP-LEFT: Stage 01 Tokens -->
+<div class="bg-white border border-slate-200 rounded-lg flex flex-col min-h-0 shadow-sm overflow-hidden">
+<div class="h-8 border-b border-slate-200 px-3 bg-slate-50/70 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-1.5">
+<span class="text-[11px] font-code-sm font-semibold text-sky-600">01</span>
+<span class="font-headline-sm text-[12px] text-slate-800">Lexer Tokens</span>
+</div>
+<span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/50 rounded font-code-sm text-[10px] uppercase font-medium">ok</span>
+</div>
+<div class="flex-1 p-2 overflow-y-auto font-code-sm text-[11px] space-y-1 bg-white select-text">
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100">
+<span class="text-slate-400">09</span>
+<span class="text-emerald-700 font-medium">ADD_ASSIGN</span>
+<span class="text-slate-800 font-mono bg-white px-1.5 rounded border border-slate-200">"+="</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100">
+<span class="text-slate-400">09</span>
+<span class="text-amber-700 font-medium">NUMBER</span>
+<span class="text-slate-800 font-mono bg-white px-1.5 rounded border border-slate-200">"15"</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100">
+<span class="text-slate-400">11</span>
+<span class="text-sky-700 font-medium">KW_IF</span>
+<span class="text-slate-800 font-mono bg-white px-1.5 rounded border border-slate-200">"IF"</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100">
+<span class="text-slate-400">11</span>
+<span class="text-slate-700 font-medium">IDENT</span>
+<span class="text-slate-800 font-mono bg-white px-1.5 rounded border border-slate-200">"performance"</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100">
+<span class="text-slate-400">12</span>
+<span class="text-sky-700 font-medium">KW_GOTO</span>
+<span class="text-slate-800 font-mono bg-white px-1.5 rounded border border-slate-200">"GOTO"</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100">
+<span class="text-slate-400">12</span>
+<span class="text-violet-700 font-medium">IDENT</span>
+<span class="text-slate-800 font-mono bg-white px-1.5 rounded border border-slate-200">"advanced"</span>
+</div>
+</div>
+<div class="h-6 border-t border-slate-200 bg-slate-50 px-3 flex items-center justify-between text-slate-400 font-code-sm text-[10px] shrink-0">
+<span>38 tokens</span>
+<span class="text-emerald-600 font-medium">0 errors</span>
+</div>
+</div>
+<!-- TOP-RIGHT: Stage 02 AST Inspector -->
+<div class="bg-white border border-slate-200 rounded-lg flex flex-col min-h-0 shadow-sm overflow-hidden">
+<div class="h-8 border-b border-slate-200 px-3 bg-slate-50/70 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-1.5">
+<span class="text-[11px] font-code-sm font-semibold text-sky-600">02</span>
+<span class="font-headline-sm text-[12px] text-slate-800">Syntax Tree</span>
+</div>
+<span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/50 rounded font-code-sm text-[10px] uppercase font-medium">ok</span>
+</div>
+<div class="flex-1 p-2 overflow-y-auto font-code-sm text-[11px] space-y-1 bg-white select-text">
+<div class="font-semibold text-slate-700 flex items-center gap-1 text-[11px] pb-1">
+<span class="material-symbols-outlined text-[13px] text-sky-600">folder_open</span>
+<span>Root: ProgramNode</span>
+</div>
+<div class="pl-2 space-y-1 text-slate-600 border-l border-slate-200">
+<div class="flex items-center gap-1">
+<span class="text-sky-700 font-medium">outcome</span>
+<span class="text-violet-600">remedial</span>
+<span class="text-slate-400">(-= 5)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-sky-700 font-medium">outcome</span>
+<span class="text-violet-600">core</span>
+</div>
+<div class="flex items-center gap-1 bg-emerald-50 text-emerald-800 px-1 py-0.5 rounded border border-emerald-100">
+<span class="text-sky-700 font-medium">outcome</span>
+<span class="text-violet-700 font-semibold">advanced</span>
+<span class="text-emerald-700 font-semibold">(+= 10)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-slate-500">set</span>
+<span>performance = 90</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-slate-500">set</span>
+<span>state = 15</span>
+</div>
+<div class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="text-sky-700">branch</span>
+<span class="text-amber-700">perf &gt; 85</span>
+<span class="text-slate-400">→</span>
+<span class="text-violet-700">advanced</span>
+</div>
+</div>
+</div>
+<div class="h-6 border-t border-slate-200 bg-slate-50 px-3 flex items-center justify-between text-slate-400 font-code-sm text-[10px] shrink-0">
+<span>12 rules reduced</span>
+<span class="text-emerald-600 font-medium">No conflicts</span>
+</div>
+</div>
+<!-- BOTTOM-LEFT: Stage 03 LLVM IR -->
+<div class="bg-white border border-slate-200 rounded-lg flex flex-col min-h-0 shadow-sm overflow-hidden">
+<div class="h-8 border-b border-slate-200 px-3 bg-slate-50/70 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-1.5">
+<span class="text-[11px] font-code-sm font-semibold text-sky-600">03</span>
+<span class="font-headline-sm text-[12px] text-slate-800">LLVM IR</span>
+</div>
+<span class="px-1.5 py-0.5 bg-sky-50 text-sky-700 border border-sky-200 rounded font-code-sm text-[10px] uppercase font-medium">opt -O2</span>
+</div>
+<div class="flex-1 p-2 overflow-y-auto font-code-sm text-[11px] bg-white leading-relaxed select-text space-y-0.5 text-slate-600">
+<div class="text-slate-400 font-mono text-[10px]">; ModuleID = 'pathway.edu'</div>
+<div class="text-sky-700 font-semibold pt-0.5">outcome.advanced:</div>
+<div class="pl-2">
+<span class="text-slate-800">%state.cur1</span> = <span class="text-amber-700">load</span> i32, ptr %state
+              </div>
+<div class="pl-2">
+<span class="text-slate-800">%outcome.adj</span> = <span class="text-emerald-700 font-medium">add</span> i32 %state.cur1, <span class="text-amber-600">10</span>
+</div>
+<div class="pl-2">
+<span class="text-amber-700">store</span> i32 %outcome.adj, ptr %state
+              </div>
+<div class="pl-2">
+<span class="text-sky-700 font-medium">br</span> label %prog_end
+              </div>
+<div class="text-sky-700 font-semibold pt-1">prog_end:</div>
+<div class="pl-2">
+<span class="text-sky-700 font-medium">ret</span> i32 %outcome.adj
+              </div>
+</div>
+<div class="h-6 border-t border-slate-200 bg-slate-50 px-3 flex items-center justify-between text-slate-400 font-code-sm text-[10px] shrink-0">
+<span>Bitcode clean</span>
+<span class="text-sky-600">Target: x86_64</span>
+</div>
+</div>
+<!-- BOTTOM-RIGHT: Stage 05 JIT Output & Console -->
+<div class="bg-white border border-slate-200 rounded-lg flex flex-col min-h-0 shadow-sm overflow-hidden">
+<div class="h-8 border-b border-slate-200 px-3 bg-slate-50/70 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-1.5">
+<span class="text-[11px] font-code-sm font-semibold text-emerald-600">05</span>
+<span class="font-headline-sm text-[12px] text-slate-800">JIT Output</span>
+</div>
+<span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/50 rounded font-code-sm text-[10px] uppercase font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> passed
+              </span>
+</div>
+<div class="flex-1 p-2.5 overflow-y-auto font-code-sm text-[11px] bg-white select-text flex flex-col justify-between">
+<div class="space-y-2">
+<!-- Command Execution -->
+<div class="bg-slate-50 px-2 py-1 rounded text-slate-600 border border-slate-100 flex items-center gap-1.5 font-mono text-[11px]">
+<span class="text-sky-600 font-bold">$</span>
+<span>lli pathway.ll</span>
+</div>
+<!-- Clean Output Highlight -->
+<div class="flex items-center justify-between px-2 py-1.5 rounded bg-slate-50 border border-slate-200">
+<span class="text-slate-500 text-[11px]">Output</span>
+<span class="font-mono text-base font-bold tracking-widest text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">11001</span>
+</div>
+<!-- Exit Code Card -->
+<div class="flex items-center justify-between px-2 py-1 rounded bg-slate-50 border border-slate-100 text-[11px]">
+<span class="text-slate-500">Exit Code</span>
+<span class="font-mono text-slate-800 font-semibold">25 (0x19)</span>
+</div>
+</div>
+<!-- Minimal Clean Status Footer Area -->
+<div class="pt-2 mt-auto border-t border-slate-100 flex items-center justify-between text-slate-500 text-[11px]">
+<span class="flex items-center gap-1 text-emerald-600 font-medium">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Process exited cleanly
+                </span>
+<span class="font-mono text-slate-400">4.6ms</span>
+</div>
+</div>
+<div class="h-6 border-t border-slate-200 bg-slate-50 px-3 flex items-center justify-between text-slate-400 font-code-sm text-[10px] shrink-0">
+<span>Stack: 2.1 kB</span>
+<span class="text-emerald-600 font-semibold">RC: 0</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Minimal Footer Bar -->
+<footer class="h-6 bg-white border-t border-slate-200 z-50 flex items-center justify-between px-3 text-slate-400 font-code-sm text-[11px] shrink-0">
+<div class="flex items-center gap-2">
+<span class="text-emerald-600 font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        Ready
+      </span>
+<span class="text-slate-300">|</span>
+<span>x86_64-pc-linux-gnu</span>
+</div>
+<div class="flex items-center gap-3">
+<span>Ln 12, Col 4</span>
+<span class="text-slate-300">|</span>
+<span>UTF-8</span>
+</div>
+</footer>
+</body></html>

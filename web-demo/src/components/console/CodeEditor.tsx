@@ -6,9 +6,10 @@ import { highlightLine } from '@/lib/alp-highlight'
 interface CodeEditorProps {
   value: string
   onChange: (value: string) => void
+  onCursorChange?: (line: number, col: number) => void
 }
 
-export function CodeEditor({ value, onChange }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, onCursorChange }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
   const gutterRef = useRef<HTMLDivElement>(null)
@@ -27,17 +28,31 @@ export function CodeEditor({ value, onChange }: CodeEditorProps) {
     }
   }
 
+  function reportCursor() {
+    const ta = textareaRef.current
+    if (!ta || !onCursorChange) return
+    const upToCursor = ta.value.slice(0, ta.selectionStart)
+    const linesUpToCursor = upToCursor.split('\n')
+    const line = linesUpToCursor.length
+    const col = linesUpToCursor[linesUpToCursor.length - 1].length + 1
+    onCursorChange(line, col)
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key !== 'Tab') return
-    e.preventDefault()
-    const ta = e.currentTarget
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    const next = value.slice(0, start) + '  ' + value.slice(end)
-    onChange(next)
-    requestAnimationFrame(() => {
-      ta.selectionStart = ta.selectionEnd = start + 2
-    })
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const ta = e.currentTarget
+      const start = ta.selectionStart
+      const end = ta.selectionEnd
+      const next = value.slice(0, start) + '  ' + value.slice(end)
+      onChange(next)
+      requestAnimationFrame(() => {
+        ta.selectionStart = ta.selectionEnd = start + 2
+        reportCursor()
+      })
+      return
+    }
+    requestAnimationFrame(reportCursor)
   }
 
   return (
@@ -52,7 +67,7 @@ export function CodeEditor({ value, onChange }: CodeEditorProps) {
           {lines.map((line, i) => (
             <div key={i} className="editor-line">
               {line.length === 0
-                ? ' '
+                ? ' '
                 : highlightLine(line).map((tok, j) => (
                     <span key={j} className={`tok-${tok.cls}`}>{tok.text}</span>
                   ))}
@@ -66,6 +81,9 @@ export function CodeEditor({ value, onChange }: CodeEditorProps) {
           onChange={(e) => onChange(e.target.value)}
           onScroll={syncScroll}
           onKeyDown={handleKeyDown}
+          onKeyUp={reportCursor}
+          onClick={reportCursor}
+          onSelect={reportCursor}
           spellCheck={false}
           autoCapitalize="off"
           autoCorrect="off"
