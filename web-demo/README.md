@@ -1,8 +1,8 @@
-# ALPC Console
+# ALPC Studio
 
-An interactive console for Path-Lang: write source on the left, click **Compile & Run**,
-and watch it move through the real compiler — lexer, parser, AST, LLVM IR, and execution —
-one stage at a time, with the actual output of each.
+An interactive workbench for Path-Lang: write source on the left, click **Run**,
+and watch it move through the real compiler — lexer tokens, parse trace, AST, LLVM IR,
+and JIT execution — with the actual output of each stage shown side by side.
 
 This is a normal Next.js server (not a static export): the `/api/compile` route shells out
 to the real `alpc.exe` and `lli` on the machine it runs on, so it needs the compiler built

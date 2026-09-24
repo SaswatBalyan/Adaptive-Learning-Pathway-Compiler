@@ -58,6 +58,24 @@ alpc examples/pathway.edu > pathway.ll
 lli pathway.ll          # or: clang pathway.ll -o pathway && ./pathway
 ```
 
+## Web workbench
+
+`web-demo/` is an interactive Next.js UI for Path-Lang: write or pick a source
+program, run it, and inspect every real compiler stage — lexer tokens, parse
+trace, AST, LLVM IR, and JIT execution — side by side. It's a normal server,
+not a static export: `/api/compile` shells out to the `alpc.exe` and `lli`
+built above, so nothing shown is simulated.
+
+```sh
+make               # build alpc.exe, if you haven't already
+cd web-demo
+npm install
+npm run dev        # http://localhost:3000
+```
+
+See `web-demo/README.md` for the environment-variable overrides if your
+toolchain isn't at the default MSYS2 path.
+
 ## The language
 
 `SET` a profile, run the **Fusion Function** over the Student State, branch on the
@@ -97,6 +115,8 @@ tests/
   fixtures/valid/     17 programs + .tokens/.parsetrace/.ast/.run/.irhas goldens
   fixtures/invalid/   11 programs + .err (expected diagnostic)
 examples/pathway.edu  the demonstration program
+web-demo/             interactive workbench UI over the real alpc.exe (see above)
+design/               design-system spec + reference mockup for the workbench UI
 docs/
   DEMO.md            evaluator walkthrough (all five artifacts, one run)
   EXECUTION_PLAN.md   how the project was built, phase by phase
