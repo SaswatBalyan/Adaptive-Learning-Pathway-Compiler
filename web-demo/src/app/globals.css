@@ -212,7 +212,16 @@ code, kbd, pre {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--color-background);
+  background-color: var(--color-background);
+  /* A very soft two-tone wash instead of a flat fill — panels sit on top and
+     stay opaque, so this only shows in the gaps/gutters between them. Set as
+     a separate background-image (not folded into `background` shorthand) so
+     a browser without color-mix() support just drops this declaration and
+     keeps the solid background-color fallback above. */
+  background-image:
+    radial-gradient(1100px 560px at 10% -15%, color-mix(in srgb, var(--color-primary) 7%, transparent), transparent 60%),
+    radial-gradient(900px 520px at 108% 118%, color-mix(in srgb, var(--color-secondary) 6%, transparent), transparent 60%);
+  background-repeat: no-repeat;
   overflow: hidden;
 }
 
@@ -711,6 +720,13 @@ code, kbd, pre {
   overflow: hidden;
 }
 
+/* A thin colored top edge per stage panel — gives each pipeline stage a
+   distinct identity at a glance instead of five identical white cards. */
+.panel-accent-sky { border-top: 3px solid var(--color-primary); }
+.panel-accent-violet { border-top: 3px solid var(--color-violet); }
+.panel-accent-emerald { border-top: 3px solid var(--color-secondary); }
+.panel-accent-amber { border-top: 3px solid var(--color-warn); }
+
 .panel__head {
   flex: none;
   height: 2rem;
@@ -818,8 +834,19 @@ code, kbd, pre {
 }
 
 .panel__empty-icon {
-  color: var(--color-border-strong);
-  margin-bottom: .15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 .4rem;
+  border-radius: 9999px;
+  background: var(--color-primary-wash);
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 600;
+  margin-bottom: .3rem;
 }
 
 /* ---------------------------------------------------------------- */
@@ -929,35 +956,61 @@ code, kbd, pre {
 /* Token / AST / trace / IR content                                   */
 /* ---------------------------------------------------------------- */
 
-.token-list {
+.token-groups {
   display: flex;
   flex-direction: column;
-  gap: .2rem;
-  padding: .4rem;
+  gap: .5rem;
+  padding: .5rem;
   font-family: var(--font-mono);
-  font-size: .68rem;
+  font-size: .74rem;
 }
 
-.token-row {
+.token-group {
   display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+.token-group__line {
+  font-size: .64rem;
+  font-weight: 600;
+  color: var(--color-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding-left: .1rem;
+}
+
+.token-group__tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+}
+
+.token-chip {
+  display: inline-flex;
   align-items: center;
-  gap: .4rem;
-  padding: .25rem .4rem;
+  gap: .35rem;
+  padding: .2rem .45rem;
   border-radius: var(--radius-control);
   background: var(--color-surface-dim);
   border: 1px solid var(--color-border);
+  line-height: 1.3;
 }
 
-.token-row__line { color: var(--color-ink-faint); flex: none; width: 1.6rem; }
-.token-row__kind { color: var(--color-primary); font-weight: 500; flex: 1; min-width: 0; }
-.token-row__kind-error { color: var(--color-error); }
-.token-row__lexeme {
+.token-chip-error {
+  background: var(--color-error-wash);
+  border-color: var(--color-error-border);
+}
+
+.token-chip__kind { color: var(--color-primary); font-weight: 600; }
+.token-chip-error .token-chip__kind { color: var(--color-error-strong); }
+
+.token-chip__lexeme {
   color: var(--color-ink);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
   padding: 0 .35rem;
-  flex: none;
   max-width: 9rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -965,9 +1018,21 @@ code, kbd, pre {
 }
 
 .tree-list {
-  padding: .5rem;
+  padding: .55rem;
   font-family: var(--font-mono);
-  font-size: .68rem;
+  font-size: .74rem;
+  line-height: 1.65;
+}
+
+.ast-line-badge {
+  flex: none;
+  font-size: .62rem;
+  font-weight: 600;
+  color: var(--color-ink-faint);
+  background: var(--color-surface-dim);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 .3rem;
 }
 
 .tree-root {
@@ -1016,8 +1081,8 @@ code, kbd, pre {
 .ir-list {
   padding: .5rem .6rem;
   font-family: var(--font-mono);
-  font-size: .68rem;
-  line-height: 1.6;
+  font-size: .72rem;
+  line-height: 1.7;
 }
 
 .ir-line {

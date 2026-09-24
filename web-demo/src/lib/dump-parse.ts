@@ -21,6 +21,27 @@ export function parseTokenDump(text: string): TokenRow[] {
   return rows
 }
 
+export interface TokenLineGroup {
+  line: number
+  tokens: TokenRow[]
+}
+
+// The lexer emits tokens in strict source order, so same-line tokens are
+// always already adjacent — grouping them lets the UI show "line 4" once
+// instead of repeating it on every single token row.
+export function groupTokensByLine(rows: TokenRow[]): TokenLineGroup[] {
+  const groups: TokenLineGroup[] = []
+  for (const row of rows) {
+    const last = groups[groups.length - 1]
+    if (last && last.line === row.line) {
+      last.tokens.push(row)
+    } else {
+      groups.push({ line: row.line, tokens: [row] })
+    }
+  }
+  return groups
+}
+
 export interface AstNode {
   type: string
   fields: [string, string][]

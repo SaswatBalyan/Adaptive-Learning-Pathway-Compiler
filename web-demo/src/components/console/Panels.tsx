@@ -2,7 +2,7 @@
 
 import type { ReactNode, RefObject } from 'react'
 import type { StageResult } from './types'
-import { parseTokenDump, parseAstDump, parseTraceDump } from '@/lib/dump-parse'
+import { parseTokenDump, parseAstDump, parseTraceDump, groupTokensByLine } from '@/lib/dump-parse'
 import { highlightIrLine, isIrLabel, isIrComment } from '@/lib/ir-highlight'
 import { IconCheckCircle } from './icons'
 
@@ -70,6 +70,7 @@ function SkippedBody() {
 export function TokensPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDivElement>; result: StageResult | null }) {
   const status = statusOf(result)
   const rows = status === 'success' && result ? parseTokenDump(result.stdout) : []
+  const groups = groupTokensByLine(rows)
   const errorCount = status === 'error' ? 1 : 0
 
   return (
@@ -78,6 +79,7 @@ export function TokensPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDiv
       index="01"
       title="Lexer Tokens"
       status={status}
+      className="panel-accent-sky"
       footer={
         <>
           <span>{status === 'success' ? `${rows.length} tokens` : ' '}</span>
@@ -91,12 +93,18 @@ export function TokensPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDiv
       {status === 'skipped' && <SkippedBody />}
       {status === 'error' && result && <ErrorBody result={result} />}
       {status === 'success' && (
-        <div className="token-list">
-          {rows.map((t, i) => (
-            <div className="token-row" key={i}>
-              <span className="token-row__line">{t.line}</span>
-              <span className={`token-row__kind ${t.kind === '?' ? 'token-row__kind-error' : ''}`}>{t.kind}</span>
-              <span className="token-row__lexeme">&quot;{t.lexeme}&quot;</span>
+        <div className="token-groups">
+          {groups.map((g) => (
+            <div className="token-group" key={g.line}>
+              <div className="token-group__line">Line {g.line}</div>
+              <div className="token-group__tokens">
+                {g.tokens.map((t, i) => (
+                  <span className={`token-chip ${t.kind === '?' ? 'token-chip-error' : ''}`} key={i} title={t.kind}>
+                    <span className="token-chip__kind">{t.kind}</span>
+                    <span className="token-chip__lexeme">{t.lexeme}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -158,6 +166,7 @@ export function ParseTracePanel({ panelRef, result }: { panelRef?: RefObject<HTM
       index="02"
       title="Parse Trace"
       status={status}
+      className="panel-accent-violet"
       footer={
         <>
           <span>{status === 'success' ? `${rows.length} reductions` : ' '}</span>
@@ -179,6 +188,40 @@ export function ParseTracePanel({ panelRef, result }: { panelRef?: RefObject<HTM
   )
 }
 
+// AST fields come back as flat key=value pairs from the raw dump. Route each
+// key through the same color language used elsewhere (violet=identifier,
+// amber=numeric magnitude, faint=structural operator, green/red=adjustment
+// sign) instead of printing every field as identical "key=value" text.
+function AstField({ fieldKey, value }: { fieldKey: string; value: string }) {
+  if (fieldKey === 'name' || fieldKey === 'var') {
+    return <span className="tree-node-name">{value}</span>
+  }
+  if (fieldKey === 'target') {
+    return (
+      <>
+        <span className="tree-node-arrow">&rarr;</span>
+        <span className="tree-node-target">{value}</span>
+      </>
+    )
+  }
+  if (fieldKey === 'op' || fieldKey === 'rel') {
+    return <span className="tree-node-op">{value}</span>
+  }
+  if (fieldKey === 'adjust') {
+    const positive = value.startsWith('+')
+    return <span className={positive ? 'tree-node-adjust-pos' : 'tree-node-adjust-neg'}>({value})</span>
+  }
+  if (fieldKey === 'value') {
+    return <span className="tree-node-value">{value}</span>
+  }
+  return (
+    <>
+      <span className="tree-node-key">{fieldKey}=</span>
+      <span className="tree-node-value">{value}</span>
+    </>
+  )
+}
+
 // ---------------------------------------------------------------------------
 
 export function AstPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDivElement>; result: StageResult | null }) {
@@ -191,6 +234,7 @@ export function AstPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDivEle
       index="03"
       title="Syntax Tree (AST)"
       status={status}
+      className="panel-accent-emerald"
       footer={
         <>
           <span>{dump ? `${dump.nodes.length} nodes` : ' '}</span>
@@ -210,17 +254,19 @@ export function AstPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDivEle
             <span>Root: ProgramNode{dump.binaryOutput ? ' (binary-output)' : ''}</span>
           </div>
           <div className="tree-branch">
-            {dump.nodes.map((n, i) => (
-              <div className="tree-row" key={i}>
-                <span className="tree-node-type">{n.type}</span>
-                {n.fields.map(([k, v]) => (
-                  <span key={k}>
-                    <span className="tree-node-key">{k}=</span>
-                    <span className="tree-node-value">{v}</span>
-                  </span>
-                ))}
-              </div>
-            ))}
+            {dump.nodes.map((n, i) => {
+              const lineField = n.fields.find(([k]) => k === 'line')
+              const restFields = n.fields.filter(([k]) => k !== 'line')
+              return (
+                <div className="tree-row" key={i}>
+                  {lineField && <span className="ast-line-badge">L{lineField[1]}</span>}
+                  <span className="tree-node-type">{n.type}</span>
+                  {restFields.map(([k, v]) => (
+                    <AstField key={k} fieldKey={k} value={v} />
+                  ))}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -241,6 +287,7 @@ export function IrPanel({ panelRef, result }: { panelRef?: RefObject<HTMLDivElem
       title="LLVM IR"
       status={status}
       okLabel="opt -O0"
+      className="panel-accent-amber"
       footer={
         <>
           <span>{status === 'success' ? `${lines.length} lines` : ' '}</span>
@@ -292,7 +339,7 @@ export function RunPanel({
       title="JIT Output"
       status={status}
       okLabel="passed"
-      className="panel-span-2"
+      className="panel-span-2 panel-accent-sky"
       footer={
         <>
           <span>{elapsedMs !== null ? `${elapsedMs.toFixed(1)}ms total` : ' '}</span>
